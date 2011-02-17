@@ -2,7 +2,7 @@ Launchit's current state is more or less just a basic idea like how a launcher
 could be implemented in Python. Launchit needs at least Python 2.6 and PyQt to
 be installed in order to run. It is currently focused on Linux systems, where 
 xdg-open is used to detect the desired program, when a non-executable file 
-should be invoked. Since Launchit separates its internal logic from the 
+is needed to be invoked. Since Launchit separates its internal logic from the 
 graphical presentation, it is possible to run it without PyQt, just using
 core.py as a stand-alone file. However, to do tests inside the (yet poorly 
 implemented) GUI, user's may run `python -m launchit.gui` from a terminal,
