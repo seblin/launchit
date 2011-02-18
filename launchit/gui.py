@@ -13,7 +13,7 @@ class CmdlineCompleter(QtGui.QCompleter):
         model = QtGui.QStringListModel()
         self.setModel(model)
 
-    def update(self, fragment=''):
+    def update(self, fragment):
         if isinstance(fragment, QtCore.QString):
             fragment = str(fragment)
         completions = core.get_name_completions(fragment)
