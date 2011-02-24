@@ -1,7 +1,7 @@
 # Stdlib
 import sys
 # 3rd party
-from PyQt4 import QtCore, QtGui
+from PySide import QtGui
 # launchit package
 from . import core
 
@@ -14,8 +14,6 @@ class CmdlineCompleter(QtGui.QCompleter):
         self.setModel(model)
 
     def update(self, fragment):
-        if isinstance(fragment, QtCore.QString):
-            fragment = str(fragment)
         completions = core.get_name_completions(fragment)
         self.model().setStringList(completions)
 
