@@ -5,6 +5,18 @@ from itertools import chain
 import os
 import shlex
 import subprocess
+import sys
+
+# Encoding used when unicode/bytes must be converted to strings
+ENCODING = 'utf-8'
+
+if sys.version_info >= (3,0):
+    basestring = (str, bytes)
+    def _tostring(obj):
+        return obj.decode(ENCODING) if isinstance(obj, bytes) else str(obj)
+else:
+    def _tostring(obj):
+        return obj.encode(ENCODING) if isinstance(obj, unicode) else str(obj)
 
 def get_path_dirs():
     """
@@ -107,10 +119,9 @@ class LaunchError(Exception):
     pass
 
 def parse_commandline(cmdline):
-    if not isinstance(cmdline, str):
-        # shlex.split() only handles str() as intended
-        class_name = cmdline.__class__.__name__
-        raise TypeError('cmdline must be string, not {0}'.format(class_name))
+    if not isinstance(cmdline, basestring):
+        raise TypeError('cmdline must be a string')
+    cmdline = _tostring(cmdline)
     return [os.path.expanduser(arg) for arg in shlex.split(cmdline)]
 
 def launch(cmdline, skip_xdg_open=False):
