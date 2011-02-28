@@ -106,6 +106,13 @@ class LaunchError(Exception):
     """
     pass
 
+def parse_commandline(cmdline):
+    if not isinstance(cmdline, str):
+        # shlex.split() only handles str() as intended
+        class_name = cmdline.__class__.__name__
+        raise TypeError('cmdline must be string, not {0}'.format(class_name))
+    return [os.path.expanduser(arg) for arg in shlex.split(cmdline)]
+
 def launch(cmdline, skip_xdg_open=False):
     """
     Analyze given command-line string and make the most reasonable kind of
@@ -130,11 +137,7 @@ def launch(cmdline, skip_xdg_open=False):
     e.g. things like "./test" instead of "test", but beware that "./test.py"
     will not necessarily execute the script (as noted above).
     """
-    if not isinstance(cmdline, str):
-        # shlex.split() only handles str() as intended
-        class_name = cmdline.__class__.__name__
-        raise TypeError('cmdline must be string, not {0}'.format(class_name))
-    args = [os.path.expanduser(arg) for arg in shlex.split(cmdline)]
+    args = parse_commandline(cmdline)
     if not args:
         raise ValueError('Got no arguments, so nothing is launched')
     # Trial and error through the kinds of invocation
