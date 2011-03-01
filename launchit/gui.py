@@ -26,8 +26,7 @@ class LaunchEdit(QtGui.QLineEdit):
         self.returnPressed.connect(self.launch)
 
     def launch(self):
-        cmdline = str(self.text())
-        core.launch(cmdline)
+        core.launch(self.text())
 
 def run_app(args=[]):
     app = QtGui.QApplication(args)
