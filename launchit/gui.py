@@ -5,7 +5,7 @@ from PySide import QtGui
 # launchit package
 from . import core
 
-class CmdlineCompleter(QtGui.QCompleter):
+class CommandlineCompleter(QtGui.QCompleter):
     def __init__(self, parent=None):
         QtGui.QCompleter.__init__(self, parent)
         mode = self.UnfilteredPopupCompletion
@@ -20,7 +20,7 @@ class CmdlineCompleter(QtGui.QCompleter):
 class LaunchEdit(QtGui.QLineEdit):
     def __init__(self, parent=None):
         QtGui.QLineEdit.__init__(self, parent)
-        completer = CmdlineCompleter()
+        completer = CommandlineCompleter()
         self.textEdited.connect(completer.update)
         self.setCompleter(completer)
         self.returnPressed.connect(self.launch)
