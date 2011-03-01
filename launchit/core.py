@@ -113,7 +113,8 @@ def launch(cmdline, skip_xdg_open=False):
         subprocess.call(args)
         success = True
     if not success:
-        raise LaunchError('Unable to launch {0!r}'.format(cmdline))
+        error = 'Unable to launch {0}'.format(' '.join(args))
+        raise LaunchError(error)
 
 ### Low-level functions
 
