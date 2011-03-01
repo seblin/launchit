@@ -128,8 +128,18 @@ def get_path_dirs():
     return [name for name in names if os.path.isdir(name)]
 
 def parse_commandline(cmdline):
+    """
+    Split given cmdline string into a list of arguments matching Unix-like 
+    shell behavior. Return an empty list if no arguments remain after that.
+    Complain about syntax errors.
+
+    Note that each "~" or "~home" at the start of an argument is understood 
+    and expanded to the user's home directory. Any other type of expansion 
+    is not supported.
+    """
     if not isinstance(cmdline, basestring):
         raise TypeError('cmdline must be a string')
+    # Work around shlex.split() limitations
     cmdline = _to_native_string(cmdline)
     return [os.path.expanduser(arg) for arg in shlex.split(cmdline)]
 
