@@ -33,10 +33,10 @@ EXIT_SUCCESS = 0
 
 if sys.version_info >= (3,0):
     basestring = (str, bytes)
-    def _tostring(obj):
+    def _to_native_string(obj):
         return obj.decode(ENCODING) if isinstance(obj, bytes) else str(obj)
 else:
-    def _tostring(obj):
+    def _to_native_string(obj):
         return obj.encode(ENCODING) if isinstance(obj, unicode) else str(obj)
 
 ### High-level functions ###
@@ -129,7 +129,7 @@ def get_path_dirs():
 def parse_commandline(cmdline):
     if not isinstance(cmdline, basestring):
         raise TypeError('cmdline must be a string')
-    cmdline = _tostring(cmdline)
+    cmdline = _to_native_string(cmdline)
     return [os.path.expanduser(arg) for arg in shlex.split(cmdline)]
 
 def is_command(filename):
