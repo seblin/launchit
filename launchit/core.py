@@ -7,8 +7,29 @@ import shlex
 import subprocess
 import sys
 
+### Exceptions ###
+
+class LaunchError(Exception):
+    """
+    Used to indicate that a given file or command could not be launched.
+    """
+    pass
+
+class XDGOpenError(Exception):
+    """
+    Used to indicate that the command "xdg-open" could not be invoked.
+    """
+    pass
+
+### Constants ###
+
 # Encoding used when unicode/bytes must be converted to strings
 ENCODING = 'utf-8'
+
+# Readable helper when checking exit code 
+EXIT_SUCCESS = 0
+
+### Compatibility stuff ###
 
 if sys.version_info >= (3,0):
     basestring = (str, bytes)
@@ -18,37 +39,7 @@ else:
     def _tostring(obj):
         return obj.encode(ENCODING) if isinstance(obj, unicode) else str(obj)
 
-def get_path_dirs():
-    """
-    Parse the environment variable PATH and return a list of all names
-    that refer to an existing directory. An empty list will be returned
-    if no suitable name could be obtained.
-    """
-    names = os.getenv('PATH', '').split(os.pathsep)
-    return [name for name in names if os.path.isdir(name)]
-
-def is_command(filename):
-    """
-    Return True if given filename exists in at least one of the directories
-    defined inside the environment variable PATH, otherwise False. If
-    filename contains a path seperator, False will be returned, too.
-    """
-    if os.path.dirname(filename) or not filename:
-        return False
-    for dirname in get_path_dirs():
-        path = os.path.join(dirname, filename)
-        if os.path.exists(path):
-            return True
-    return False
-
-def is_executable_file(path):
-    """
-    Return True if given path refers to a non-empty executable file,
-    otherwise False.
-    """
-    return (os.access(path, os.X_OK) and
-            os.path.isfile(path) and
-            os.path.getsize(path) > 0)
+### High-level functions ###
 
 def get_name_completions(fragment=''):
     """
@@ -81,48 +72,6 @@ def get_name_completions(fragment=''):
     if os.path.basename(fragment):
         names = (name for name in names if fragment in name)
     return sorted(names)
-
-class XDGOpenError(Exception):
-    """
-    Used to indicate that the command "xdg-open" could not be invoked.
-    """
-    pass
-
-def xdg_open(path, output_dest=None, error_dest=None):
-    """
-    Run the command "xdg-open" with given path and return its exit code.
-
-    If redirection of output is needed, a file descriptor or a file object
-    may be passed as a destination for the desired stream. The default
-    value None means using the file descriptor of the parent process.
-
-    Note that this function of course requires the "xdg-open" tool to be
-    installed on the user's system in order to work. When unable to call
-    it, a `XDGOpenError` is raised.
-    """
-    # TODO: Make detection work on non-linux systems (with no xdg-open)
-    try:
-        exit_code = subprocess.call(['xdg-open', path],
-                                    stdout=output_dest,
-                                    stderr=error_dest)
-    except OSError:
-        raise XDGOpenError('Unable to run xdg-open')
-    return exit_code
-
-# Readable helper when checking exit code 
-EXIT_SUCCESS = 0
-
-class LaunchError(Exception):
-    """
-    Used to indicate that a given file or command could not be launched.
-    """
-    pass
-
-def parse_commandline(cmdline):
-    if not isinstance(cmdline, basestring):
-        raise TypeError('cmdline must be a string')
-    cmdline = _tostring(cmdline)
-    return [os.path.expanduser(arg) for arg in shlex.split(cmdline)]
 
 def launch(cmdline, skip_xdg_open=False):
     """
@@ -165,3 +114,64 @@ def launch(cmdline, skip_xdg_open=False):
         success = True
     if not success:
         raise LaunchError('Unable to launch {0!r}'.format(cmdline))
+
+### Low-level functions
+
+def get_path_dirs():
+    """
+    Parse the environment variable PATH and return a list of all names
+    that refer to an existing directory. An empty list will be returned
+    if no suitable name could be obtained.
+    """
+    names = os.getenv('PATH', '').split(os.pathsep)
+    return [name for name in names if os.path.isdir(name)]
+
+def parse_commandline(cmdline):
+    if not isinstance(cmdline, basestring):
+        raise TypeError('cmdline must be a string')
+    cmdline = _tostring(cmdline)
+    return [os.path.expanduser(arg) for arg in shlex.split(cmdline)]
+
+def is_command(filename):
+    """
+    Return True if given filename exists in at least one of the directories
+    defined inside the environment variable PATH, otherwise False. If
+    filename contains a path seperator, False will be returned, too.
+    """
+    if os.path.dirname(filename) or not filename:
+        return False
+    for dirname in get_path_dirs():
+        path = os.path.join(dirname, filename)
+        if os.path.exists(path):
+            return True
+    return False
+
+def xdg_open(path, output_dest=None, error_dest=None):
+    """
+    Run the command "xdg-open" with given path and return its exit code.
+
+    If redirection of output is needed, a file descriptor or a file object
+    may be passed as a destination for the desired stream. The default
+    value None means using the file descriptor of the parent process.
+
+    Note that this function of course requires the "xdg-open" tool to be
+    installed on the user's system in order to work. When unable to call
+    it, a `XDGOpenError` is raised.
+    """
+    # TODO: Make detection work on non-linux systems (with no xdg-open)
+    try:
+        exit_code = subprocess.call(['xdg-open', path],
+                                    stdout=output_dest,
+                                    stderr=error_dest)
+    except OSError:
+        raise XDGOpenError('Unable to run xdg-open')
+    return exit_code
+
+def is_executable_file(path):
+    """
+    Return True if given path refers to a non-empty executable file,
+    otherwise False.
+    """
+    return (os.access(path, os.X_OK) and
+            os.path.isfile(path) and
+            os.path.getsize(path) > 0)
