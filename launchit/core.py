@@ -116,6 +116,15 @@ def launch(cmdline, skip_xdg_open=False):
         error = 'Unable to launch {0}'.format(' '.join(args))
         raise LaunchError(error)
 
+def get_marked_completion(completion, fragment, start_mark, end_mark):
+    """
+    Replace each occurrence of given fragment with the fragment surrounded 
+    by start_mark and end_mark. A mark may be e.g. a HTML tag or a terminal
+    escape sequence.
+    """
+    marked_fragment = start_mark + fragment + end_mark
+    return completion.replace(fragment, marked_fragment)
+
 ### Low-level functions
 
 def get_path_dirs():
