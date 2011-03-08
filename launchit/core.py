@@ -23,7 +23,7 @@ class XDGOpenError(Exception):
 
 ### Constants ###
 
-# Encoding used when unicode/bytes must be converted to strings
+# Encoding used when unicode/bytes must be converted to strings and vice versa
 ENCODING = 'utf-8'
 
 # Readable helper when checking exit code 
@@ -32,12 +32,23 @@ EXIT_SUCCESS = 0
 ### Compatibility stuff ###
 
 if sys.version_info >= (3,0):
-    basestring = (str, bytes)
+    _altstring = bytes
+    basestring = (str, _altstring)
+
+    def _to_alternate_string(obj):
+        return obj if isinstance(obj, _altstring) else str(obj).encode(ENCODING)
+
     def _to_native_string(obj):
-        return obj.decode(ENCODING) if isinstance(obj, bytes) else str(obj)
+        return obj.decode(ENCODING) if isinstance(obj, _altstring) else str(obj)
+
 else:
+    _altstring = unicode
+
+    def _to_alternate_string(obj):
+        return obj if isinstance(obj, _altstring) else str(obj).decode(ENCODING)
+
     def _to_native_string(obj):
-        return obj.encode(ENCODING) if isinstance(obj, unicode) else str(obj)
+        return obj.encode(ENCODING) if isinstance(obj, _altstring) else str(obj)
 
 ### High-level functions ###
 
