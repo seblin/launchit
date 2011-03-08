@@ -160,8 +160,12 @@ def parse_commandline(cmdline):
     if not isinstance(cmdline, basestring):
         raise TypeError('cmdline must be a string')
     # Work around shlex.split() limitations
-    cmdline = _to_native_string(cmdline)
-    return [os.path.expanduser(arg) for arg in shlex.split(cmdline)]
+    native_cmdline = _to_native_string(cmdline)
+    args = [os.path.expanduser(arg) for arg in shlex.split(native_cmdline)]
+    # Re-convert if needed
+    if isinstance(cmdline, _altstring):
+        args = [_to_alternate_string(arg) for arg in args]
+    return args
 
 def is_command(filename):
     """
