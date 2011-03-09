@@ -3,7 +3,7 @@ import sys
 # 3rd party
 from PySide import QtGui
 # launchit package
-from . import core
+import core
 
 class MarkedCompletionDelegate(QtGui.QItemDelegate):
     def __init__(self, start_mark='<b><u>', end_mark='</u></b>', parent=None):
