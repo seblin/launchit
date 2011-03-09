@@ -118,7 +118,8 @@ def launch(cmdline, skip_xdg_open=False):
         success = True
     if not success and not skip_xdg_open and len(args) == 1:
         with open(os.devnull, 'w') as null:
-            success = xdg_open(args[0], null, null) == EXIT_SUCCESS
+            success = xdg_open(args[0], 
+                               stdout=null, stderr=null) == EXIT_SUCCESS
     if not success and is_executable_file(args[0]):
         args[0] = os.path.abspath(args[0])
         subprocess.call(args)
@@ -181,7 +182,7 @@ def is_command(filename):
             return True
     return False
 
-def xdg_open(path, output_dest=None, error_dest=None):
+def xdg_open(path, stdout=None, stderr=None):
     """
     Run the command "xdg-open" with given path and return its exit code.
 
@@ -196,8 +197,8 @@ def xdg_open(path, output_dest=None, error_dest=None):
     # TODO: Make detection work on non-linux systems (with no xdg-open)
     try:
         exit_code = subprocess.call(['xdg-open', path],
-                                    stdout=output_dest,
-                                    stderr=error_dest)
+                                    stdout=stdout,
+                                    stderr=stderr)
     except OSError:
         raise XDGOpenError('Unable to run xdg-open')
     return exit_code
