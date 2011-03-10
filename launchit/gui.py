@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Stdlib
 import sys
 # 3rd party
