@@ -116,15 +116,15 @@ def launch(cmdline, skip_xdg_open=False):
     # Trial and error through the kinds of invocation
     success = False
     if is_command(args[0]):
-        subprocess.call(args)
+        subprocess.Popen(args)
         success = True
     if not success and not skip_xdg_open and len(args) == 1:
         with open(os.devnull, 'w') as null:
-            success = xdg_open(args[0], 
+            success = xdg_open(args[0],
                                stdout=null, stderr=null) == EXIT_SUCCESS
     if not success and is_executable_file(args[0]):
         args[0] = os.path.abspath(args[0])
-        subprocess.call(args)
+        subprocess.Popen(args)
         success = True
     if not success:
         error = 'Unable to launch {0}'.format(' '.join(args))
