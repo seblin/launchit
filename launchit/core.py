@@ -7,17 +7,9 @@ import shlex
 import subprocess
 import sys
 
-### Exceptions ###
-
 class LaunchError(Exception):
     """
     Used to indicate that a given file or command could not be launched.
-    """
-    pass
-
-class XDGOpenError(Exception):
-    """
-    Used to indicate that the command "xdg-open" could not be invoked.
     """
     pass
 
@@ -186,21 +178,14 @@ def xdg_open(path, silent=False):
     """
     Run the command "xdg-open" with given path and return its exit code.
     The `silent`-flag may be used to suppress the program's output.
-
-    Note that this function of course requires the "xdg-open" tool to be
-    installed on the user's system in order to work. When unable to call
-    it, a `XDGOpenError` is raised.
     """
     # TODO: Make detection work on non-linux systems (with no xdg-open)
     args = ['xdg-open', path]
-    try:
-        if silent:
-            with open(os.devnull, 'wb') as null:
-                exit_code = subprocess.call(args, stdout=null, stderr=null)
-        else:
-            exit_code = subprocess.call(args)
-    except OSError:
-        raise XDGOpenError('Unable to run xdg-open')
+    if silent:
+        with open(os.devnull, 'wb') as null:
+            exit_code = subprocess.call(args, stdout=null, stderr=null)
+    else:
+        exit_code = subprocess.call(args)
     return exit_code
 
 def is_executable_file(path):
