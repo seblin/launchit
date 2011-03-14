@@ -119,9 +119,7 @@ def launch(cmdline, skip_xdg_open=False):
         subprocess.Popen(args)
         success = True
     if not success and not skip_xdg_open and len(args) == 1:
-        with open(os.devnull, 'w') as null:
-            success = xdg_open(args[0],
-                               stdout=null, stderr=null) == EXIT_SUCCESS
+        success = xdg_open(args[0], silent=True) == EXIT_SUCCESS
     if not success and is_executable_file(args[0]):
         args[0] = os.path.abspath(args[0])
         subprocess.Popen(args)
@@ -184,23 +182,23 @@ def is_command(filename):
             return True
     return False
 
-def xdg_open(path, stdout=None, stderr=None):
+def xdg_open(path, silent=False):
     """
     Run the command "xdg-open" with given path and return its exit code.
-
-    If redirection of output is needed, a file descriptor or a file object
-    may be passed as a destination for the desired stream. The default
-    value None means using the file descriptor of the parent process.
+    The `silent`-flag may be used to suppress the program's output.
 
     Note that this function of course requires the "xdg-open" tool to be
     installed on the user's system in order to work. When unable to call
     it, a `XDGOpenError` is raised.
     """
     # TODO: Make detection work on non-linux systems (with no xdg-open)
+    args = ['xdg-open', path]
     try:
-        exit_code = subprocess.call(['xdg-open', path],
-                                    stdout=stdout,
-                                    stderr=stderr)
+        if silent:
+            with open(os.devnull, 'wb') as null:
+                exit_code = subprocess.call(args, stdout=null, stderr=null)
+        else:
+            exit_code = subprocess.call(args)
     except OSError:
         raise XDGOpenError('Unable to run xdg-open')
     return exit_code
