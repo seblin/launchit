@@ -160,18 +160,26 @@ def parse_commandline(cmdline):
         args = [_to_alternate_string(arg) for arg in args]
     return args
 
-def is_command(filename):
+def is_command(name):
     """
-    Return True if given filename exists in at least one of the directories
-    defined inside the environment variable PATH, otherwise False. If
-    filename contains a path seperator, False will be returned, too.
+    Return True if given name refers to an existing file in one of the 
+    directories defined inside the environment variable PATH, otherwise 
+    False. The given name may be a filename or an absolute path.
     """
-    if os.path.dirname(filename) or not filename:
+    dirname, basename = os.path.split(name)
+    if not basename:
         return False
-    for dirname in get_path_dirs():
-        path = os.path.join(dirname, filename)
-        if os.path.exists(path):
-            return True
+    path_dirs = get_path_dirs()
+    if dirname:
+        if dirname in path_dirs:
+            return os.path.isfile(name)
+        else:
+            return False
+    else:
+        for path_dir in path_dirs:
+            path = os.path.join(path_dir, basename)
+            if os.path.isfile(path):
+                return True
     return False
 
 def xdg_open(path, silent=False):
