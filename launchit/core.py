@@ -5,7 +5,10 @@ from itertools import chain
 import os
 import shlex
 import subprocess
-import sys
+
+# launchit package
+from _stringutils import (altstring, basestring, ENCODING, 
+                          to_alternate_string, to_native_string)
 
 class LaunchError(Exception):
     """
@@ -13,34 +16,8 @@ class LaunchError(Exception):
     """
     pass
 
-### Constants ###
-
-# Encoding used when unicode/bytes must be converted to strings and vice versa
-ENCODING = 'utf-8'
-
 # Readable helper when checking exit code 
 EXIT_SUCCESS = 0
-
-### Compatibility stuff ###
-
-if sys.version_info >= (3,0):
-    _altstring = bytes
-    basestring = (str, _altstring)
-
-    def _to_alternate_string(obj):
-        return obj if isinstance(obj, _altstring) else str(obj).encode(ENCODING)
-
-    def _to_native_string(obj):
-        return obj.decode(ENCODING) if isinstance(obj, _altstring) else str(obj)
-
-else:
-    _altstring = unicode
-
-    def _to_alternate_string(obj):
-        return obj if isinstance(obj, _altstring) else str(obj).decode(ENCODING)
-
-    def _to_native_string(obj):
-        return obj.encode(ENCODING) if isinstance(obj, _altstring) else str(obj)
 
 ### High-level functions ###
 
@@ -71,8 +48,8 @@ def get_name_completions(fragment=''):
         names = (os.path.join(dirname, name) for name in os.listdir(expanded))
     else:
         dirnames = get_path_dirs() + [os.curdir]
-        if isinstance(fragment, _altstring):
-            dirnames = (_to_alternate_string(dirname) for dirname in dirnames)
+        if isinstance(fragment, altstring):
+            dirnames = (to_alternate_string(dirname) for dirname in dirnames)
         names = set(chain.from_iterable(map(os.listdir, dirnames)))
     if os.path.basename(fragment):
         names = (name for name in names if fragment in name)
@@ -153,11 +130,11 @@ def parse_commandline(cmdline):
     if not isinstance(cmdline, basestring):
         raise TypeError('cmdline must be a string')
     # Work around shlex.split() limitations
-    native_cmdline = _to_native_string(cmdline)
+    native_cmdline = to_native_string(cmdline)
     args = [os.path.expanduser(arg) for arg in shlex.split(native_cmdline)]
     # Re-convert if needed
-    if isinstance(cmdline, _altstring):
-        args = [_to_alternate_string(arg) for arg in args]
+    if isinstance(cmdline, altstring):
+        args = [to_alternate_string(arg) for arg in args]
     return args
 
 def is_command(name):
