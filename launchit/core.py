@@ -19,7 +19,7 @@ class LaunchError(Exception):
 # Readable helper when checking exit code 
 EXIT_SUCCESS = 0
 
-### High-level functions ###
+### High-level functions
 
 def get_name_completions(fragment=''):
     """
