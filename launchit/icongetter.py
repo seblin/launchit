@@ -89,7 +89,7 @@ def iter_command_icons():
 def iter_menu_files():
     """
     Iterate through the `.menu`-files found in the globally defined 
-    MENU_PATH and yield a `xdg.Menu.Menu` object for each file. Each 
+    MENU_DIR and yield a `xdg.Menu.Menu` object for each file. Each 
     of those objects will then contain the `.menu`-file's entries in 
     a parsed structure.
     """
