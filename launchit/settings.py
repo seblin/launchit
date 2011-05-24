@@ -10,8 +10,12 @@ def get_user_config(filename='launchit.conf'):
     """
     Return the parsed contents of a configuration file, which is named with
     `filename`, as a dictionary, where the file is assumed to exist inside 
-    the user's "standard" configuration directory. In case that the file 
-    does not exist there, an empty dictionary will be returned.
+    the user's "standard" configuration directory. In case that no such file
+    could be found, an empty dictionary will be returned. 
+
+    Note that a detailed explanation of the expected scheme inside the config
+    file can be found in `iter_config_entries()`, while the config file's path 
+    is retrieved by `get_config_path()`.
     """
     path = get_config_path(filename)
     if not os.path.exists(path):
