@@ -22,7 +22,7 @@ def get_user_config(filename='launchit.conf'):
         return {}
     return get_config_entries(path)
 
-def get_config_path(filename):
+def get_config_path(filename='launchit.conf'):
     """
     Return a XDG-compliant path pointing to the place where the given 
     configuration file should be stored.
