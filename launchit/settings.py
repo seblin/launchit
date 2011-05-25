@@ -42,9 +42,9 @@ def get_config_entries(path):
 
 def iter_config_entries(lines):
     """
-    Iterate over `lines`, which might be a file-like object or a list of 
-    strings and return a `(key, value)`-pair for each line. Parsing is done 
-    according to the following rules: 
+    Iterate over the given configuration lines, which may be either a file-like
+    object or a list of strings and return a `(key, value)`-pair for each line.
+    Parsing is done according to the following rules: 
 
     Each line must use the scheme `key: value` to define an item. If a line 
     contains multiple `:`-chars, then the first one disappears, as it is used 
@@ -53,8 +53,8 @@ def iter_config_entries(lines):
     are read until a `#` appears, since that is interpreted as the beginning of 
     a comment. Whitespace at the beginning or at the end of a line is ignored. 
     The same goes for whitespace between key/value and separator. Empty lines 
-    are ignored either, while lines with non-whitespaced contents, which don't 
-    contain the separator, are an error. Note that keys and values will always 
+    are just ignored, while a line with non-whitespaced contents, which doesn't 
+    contain the separator, is an error. Note that keys and values will always 
     be strings.
     """
     for index, line in enumerate(lines):
