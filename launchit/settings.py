@@ -6,6 +6,9 @@ import os
 # 3rd party
 from xdg.BaseDirectory import xdg_config_home
 
+# Default configuration
+config = {}
+
 def get_user_config(filename='launchit.conf'):
     """
     Return the parsed contents of a configuration file, which is named with
@@ -65,3 +68,6 @@ def iter_config_entries(lines):
                 raise ValueError(msg.format(index + 1))
             key, value = code.split(':', 1)
             yield (key.strip(), value.strip())
+
+# This is where user-defined values may come in
+config.update(get_user_config())
