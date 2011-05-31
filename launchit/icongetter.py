@@ -12,12 +12,13 @@ import warnings
 import xdg.Menu
 
 # launchit package
+from . import settings
 from ._stringutils import (
     altstring, basestring, to_alternate_string, to_native_string)
 from .core import is_command
 
 # Directory that contains the desktop environment's `.menu`-files
-MENU_DIR = '/etc/xdg/menus'
+MENU_DIR = settings.config['menu-dir']
 
 icon_cache = {}
 

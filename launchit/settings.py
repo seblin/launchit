@@ -9,6 +9,7 @@ from xdg.BaseDirectory import xdg_config_home
 # Default configuration
 config = {
     'encoding': 'utf-8',
+    'menu-dir': '/etc/xdg/menus',
 }
 
 def get_user_config(filename='launchit.conf'):
