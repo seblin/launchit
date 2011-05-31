@@ -2,12 +2,15 @@
 Converters and definitions for string handling on Python 2 and Python 3.
 (Not part of the launchit API)
 """
+# Stdlib
 import sys
+# Launchit package
+from . import settings
 
 on_py3k = sys.version_info >= (3,0)
 
 # Encoding used when unicode/bytes must be converted to strings and vice versa
-ENCODING = 'utf-8'
+ENCODING = settings.config['encoding']
 
 # The Python version's "alternate" string type
 altstring = bytes if on_py3k else unicode

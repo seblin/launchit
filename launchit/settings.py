@@ -7,7 +7,9 @@ import os
 from xdg.BaseDirectory import xdg_config_home
 
 # Default configuration
-config = {}
+config = {
+    'encoding': 'utf-8',
+}
 
 def get_user_config(filename='launchit.conf'):
     """
