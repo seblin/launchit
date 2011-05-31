@@ -12,9 +12,9 @@ import warnings
 import xdg.Menu
 
 # launchit package
-from _stringutils import (
+from ._stringutils import (
     altstring, basestring, to_alternate_string, to_native_string)
-from core import is_command
+from .core import is_command
 
 # Directory that contains the desktop environment's `.menu`-files
 MENU_DIR = '/etc/xdg/menus'

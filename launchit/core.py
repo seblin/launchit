@@ -7,8 +7,8 @@ import shlex
 import subprocess
 
 # launchit package
-from _stringutils import (altstring, basestring, ENCODING, 
-                          to_alternate_string, to_native_string)
+from ._stringutils import (altstring, basestring, ENCODING,
+                           to_alternate_string, to_native_string)
 
 class LaunchError(Exception):
     """
@@ -16,7 +16,7 @@ class LaunchError(Exception):
     """
     pass
 
-# Readable helper when checking exit code 
+# Readable helper when checking exit code
 EXIT_SUCCESS = 0
 
 ### High-level functions
@@ -99,7 +99,7 @@ def launch(cmdline, skip_xdg_open=False):
 
 def get_marked_completion(completion, fragment, start_mark, end_mark):
     """
-    Replace each occurrence of given fragment with the fragment surrounded 
+    Replace each occurrence of given fragment with the fragment surrounded
     by start_mark and end_mark. A mark may be e.g. a HTML tag or a terminal
     escape sequence.
     """
@@ -119,12 +119,12 @@ def get_path_dirs():
 
 def parse_commandline(cmdline):
     """
-    Split given cmdline string into a list of arguments matching Unix-like 
+    Split given cmdline string into a list of arguments matching Unix-like
     shell behavior. Return an empty list if no arguments remain after that.
     Complain about syntax errors.
 
-    Note that each "~" or "~home" at the start of an argument is understood 
-    and expanded to the user's home directory. Any other type of expansion 
+    Note that each "~" or "~home" at the start of an argument is understood
+    and expanded to the user's home directory. Any other type of expansion
     is not supported.
     """
     if not isinstance(cmdline, basestring):
@@ -139,8 +139,8 @@ def parse_commandline(cmdline):
 
 def is_command(name):
     """
-    Return True if given name refers to an existing file in one of the 
-    directories defined inside the environment variable PATH, otherwise 
+    Return True if given name refers to an existing file in one of the
+    directories defined inside the environment variable PATH, otherwise
     False. The given name may be a filename or an absolute path.
     """
     dirname, basename = os.path.split(name)
