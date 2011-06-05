@@ -9,6 +9,7 @@ import subprocess
 # launchit package
 from ._stringutils import (altstring, basestring, ENCODING,
                            to_alternate_string, to_native_string)
+from . import settings
 
 class LaunchError(Exception):
     """
@@ -18,6 +19,9 @@ class LaunchError(Exception):
 
 # Readable helper when checking exit code
 EXIT_SUCCESS = 0
+
+# The tool used to open a file in the "preferred way"
+STARTER = settings.config['starter']
 
 ### High-level functions
 
@@ -55,7 +59,7 @@ def get_name_completions(fragment=''):
         names = (name for name in names if fragment in name)
     return sorted(names)
 
-def launch(cmdline, skip_xdg_open=False):
+def launch(cmdline, skip_starter=False):
     """
     Analyze given command-line string and make the most reasonable kind of
     invocation on it.
@@ -64,20 +68,20 @@ def launch(cmdline, skip_xdg_open=False):
     name in one of the directories defined by the PATH environment variable),
     it will be executed. Otherwise, if `cmdline` consists of exactly one
     argument, that argument is interpreted as a path name, which is then meant
-    to be launched with the user's preferred application using "xdg-open". If
-    that step failed or if `cmdline` contains more than one argument, then the
-    arguments are treated as something that should be executed inside the
-    current directory. To do so, the first argument will be converted to an
-    absolute path name and then be invoked if possible. In case that finally
-    none of this succeeded, a `LaunchError` will be raised.
+    to be launched with the user's preferred application by use of the function 
+    `open_with_starter()`. If that step failed or if `cmdline` contains more 
+    than one argument, then the arguments are treated as something that should 
+    be executed inside the current directory. To do so, the first argument will 
+    be converted to an absolute path name and then be invoked if possible. In 
+    case that finally none of this succeeded, a `LaunchError` will be raised.
 
-    Note that "xdg-open" detection may be skipped in order to force the
-    execution of scripts. Users may also want to quote path names, which
-    contain whitespace characters. Furthermore, "~" and "~home" in a path
-    are understood and expanded to the user's home directory. It sometimes
-    might be useful to specify a directory component to avoid name clashes,
-    e.g. things like "./test" instead of "test", but beware that "./test.py"
-    will not necessarily execute the script (as noted above).
+    Note that the "starter step" may be skipped in order to force the execution 
+    of scripts (as most starters would open an editor instead). Users may also 
+    want to quote path names, which contain whitespace characters. Furthermore, 
+    "~" and "~home" in a path are understood and expanded to the user's home 
+    directory. It sometimes might be useful to specify a directory component to 
+    avoid name clashes, e.g. things like "./test" instead of "test", but beware 
+    that "./test.py" will not necessarily execute the script (as noted above).
     """
     args = parse_commandline(cmdline)
     if not args:
@@ -87,8 +91,8 @@ def launch(cmdline, skip_xdg_open=False):
     if is_command(args[0]):
         subprocess.Popen(args)
         success = True
-    if not success and not skip_xdg_open and len(args) == 1:
-        success = xdg_open(args[0], silent=True) == EXIT_SUCCESS
+    if not success and not skip_starter and len(args) == 1:
+        success = open_with_starter(args[0], silent=True) == EXIT_SUCCESS
     if not success and is_executable_file(args[0]):
         args[0] = os.path.abspath(args[0])
         subprocess.Popen(args)
@@ -159,13 +163,15 @@ def is_command(name):
                 return True
     return False
 
-def xdg_open(path, silent=False):
+def open_with_starter(path, silent=False):
     """
-    Run the command "xdg-open" with given path and return its exit code.
-    The `silent`-flag may be used to suppress the program's output.
+    Invoke pre-defined starter with given path and return its exit code.
+    The `silent`-flag may be used to suppress the program's output. 
+
+    Note that the starter is defined inside `launchit.settings.config`
+    and may be changed, if needed.
     """
-    # TODO: Make detection work on non-linux systems (with no xdg-open)
-    args = ['xdg-open', path]
+    args = [STARTER, path]
     if silent:
         with open(os.devnull, 'wb') as null:
             exit_code = subprocess.call(args, stdout=null, stderr=null)
