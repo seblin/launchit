@@ -112,14 +112,21 @@ def get_marked_completion(completion, fragment, start_mark, end_mark):
 
 ### Low-level functions
 
+def splitenv(varname):
+    """
+    Get the environment variable `varname`s contents and split them at their
+    platform-dependent path separator (`:` on POSIX, `;` on Windows). Return 
+    the result as a list, which may be empty if there is no content.
+    """
+    return os.getenv(varname, '').split(os.pathsep)
+
 def get_path_dirs():
     """
     Parse the environment variable PATH and return a list of all names
     that refer to an existing directory. An empty list will be returned
     if no suitable name could be obtained.
     """
-    names = os.getenv('PATH', '').split(os.pathsep)
-    return [name for name in names if os.path.isdir(name)]
+    return [name for name in splitenv('PATH') if os.path.isdir(name)]
 
 def parse_commandline(cmdline):
     """
