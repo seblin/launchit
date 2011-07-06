@@ -9,16 +9,37 @@ import shlex
 import warnings
 
 # 3rd party
+import xdg.IconTheme
 import xdg.Menu
 
 # launchit package
 from . import settings
 from ._stringutils import (
     altstring, basestring, to_alternate_string, to_native_string)
-from .core import is_command
+from .core import is_command, is_executable_file
 
 # Directory that contains the desktop environment's `.menu`-files
 MENU_DIR = settings.config['menu-dir']
+
+# Icon name constants (following XDG icon spec)
+ICON_RUN = 'system-run'
+ICON_EXECUTABLE = 'application-x-executable'
+
+def guess_icon_name(path, fallback=ICON_RUN):
+    """
+    Return a suitable icon name for the given `path`. If `path` is a 
+    command, which appears in one of the user's menu entries, then 
+    return the entry's icon name. Otherwise return a generic icon name 
+    depending on the filetype of `path`. In case that no association 
+    could be made, `fallback` will be returned instead.
+    """
+    starter_icon = get_starter_icon(path)
+    if starter_icon:
+        return starter_icon
+    elif is_command(path) or is_executable_file(path):
+        return ICON_EXECUTABLE
+    else:
+        return fallback
 
 icon_cache = {}
 
