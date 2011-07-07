@@ -1,6 +1,5 @@
 """
-Detect a command's associated starter icon by analyzing the user's menu 
-entries. Note that this module depends on PyXDG.
+Detect suitable command icons.
 """
 # Stdlib
 import glob
