@@ -45,11 +45,14 @@ def guess_icon_name(path, fallback=ICON_RUN):
     """
     starter_icon = get_starter_icon(path)
     if starter_icon:
-        return starter_icon
+        name = starter_icon
     elif is_command(path) or is_executable_file(path):
-        return ICON_EXECUTABLE
+        name = ICON_EXECUTABLE
     else:
-        return fallback
+        name = fallback
+    if isinstance(path, altstring):
+        name = to_alternate_string(name)
+    return name
 
 icon_cache = {}
 
