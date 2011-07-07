@@ -16,7 +16,7 @@ import xdg.Menu
 from . import settings
 from ._stringutils import (
     altstring, basestring, to_alternate_string, to_native_string)
-from .core import is_command, is_executable_file
+from .core import is_command, is_executable_file, parse_commandline
 
 # Directory that contains the desktop environment's `.menu`-files
 MENU_DIR = settings.config['menu-dir']
@@ -24,6 +24,18 @@ MENU_DIR = settings.config['menu-dir']
 # Icon name constants (following XDG icon spec)
 ICON_RUN = 'system-run'
 ICON_EXECUTABLE = 'application-x-executable'
+
+def get_iconpath_for_commandline(cmdline, size, theme):
+    """
+    High-level function, which takes and parses the given `cmdline`.
+    Then `cmdline`s first argument is used to guess a suitable icon
+    name. Finally a full icon path for that name is returned with 
+    respect to the desired `size` and `theme`. Note that `None` may 
+    be returned if no icon path could be obtained.
+    """
+    args = parse_commandline(cmdline)
+    icon_name = guess_icon_name(args[0])
+    return xdg.IconTheme.getIconPath(icon_name, size, theme)
 
 def guess_icon_name(path, fallback=ICON_RUN):
     """
