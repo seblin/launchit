@@ -5,7 +5,6 @@ entries. Note that this module depends on PyXDG.
 # Stdlib
 import glob
 import os
-import shlex
 import warnings
 
 # 3rd party
@@ -112,7 +111,7 @@ def iter_command_icons():
     for menu in iter_menu_files():
         for entry in iter_desktop_entries(menu):
             exec_ = to_native_string(entry.getExec())
-            cmd = shlex.split(exec_)[0]
+            cmd = parse_commandline(exec_)[0]
             if is_command(cmd):
                 cmd = os.path.basename(cmd)
             icon = to_native_string(entry.getIcon())
