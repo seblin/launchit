@@ -32,7 +32,7 @@ def get_iconpath_for_commandline(cmdline, size, theme):
     be returned if no icon path could be obtained.
     """
     args = parse_commandline(cmdline)
-    icon_name = guess_icon_name(args[0])
+    icon_name = guess_icon_name(args[0] if args else '')
     return xdg.IconTheme.getIconPath(icon_name, size, theme)
 
 def guess_icon_name(path, fallback=ICON_RUN):
