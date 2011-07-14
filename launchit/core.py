@@ -7,8 +7,7 @@ import shlex
 import subprocess
 
 # launchit package
-from ._stringutils import (altstring, basestring, ENCODING,
-                           to_alternate_string, to_native_string)
+from ._stringutils import altstring, basestring, convert, ENCODING
 from . import settings
 
 class LaunchError(Exception):
@@ -53,7 +52,7 @@ def get_name_completions(fragment=''):
     else:
         dirnames = get_path_dirs() + [os.curdir]
         if isinstance(fragment, altstring):
-            dirnames = (to_alternate_string(dirname) for dirname in dirnames)
+            dirnames = (convert(dirname, altstring) for dirname in dirnames)
         names = set(chain.from_iterable(map(os.listdir, dirnames)))
     if os.path.basename(fragment):
         names = (name for name in names if fragment in name)
@@ -141,11 +140,11 @@ def parse_commandline(cmdline):
     if not isinstance(cmdline, basestring):
         raise TypeError('cmdline must be a string')
     # Work around shlex.split() limitations
-    native_cmdline = to_native_string(cmdline)
+    native_cmdline = convert(cmdline, str)
     args = [os.path.expanduser(arg) for arg in shlex.split(native_cmdline)]
     # Re-convert if needed
     if isinstance(cmdline, altstring):
-        args = [to_alternate_string(arg) for arg in args]
+        args = [convert(arg, altstring) for arg in args]
     return args
 
 def is_command(name):

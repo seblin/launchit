@@ -18,6 +18,21 @@ altstring = bytes if on_py3k else unicode
 # Abstract "type" for alternate and native strings (disappeared with Python 3)
 basestring = (str, altstring)
 
+def convert(obj, out_type):
+    """
+    Convert `obj` to an instance of `out_type` and return the result. 
+
+    Note that `out_type` must be a string type, otherwise an exception is 
+    raised. If `out_type` is an inherited string type, its corresponding
+    built-in type is used.
+    """
+    if issubclass(out_type, altstring):
+        return to_alternate_string(obj)
+    elif issubclass(out_type, str):
+        return to_native_string(obj)
+    else:
+        raise TypeError('out_type must be a string type')
+
 def to_alternate_string(obj):
     """
     Convert given object to an alternate string. 

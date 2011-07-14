@@ -12,8 +12,7 @@ import xdg.Menu
 
 # launchit package
 from . import settings
-from ._stringutils import (
-    altstring, basestring, to_alternate_string, to_native_string)
+from ._stringutils import convert, to_native_string
 from .core import is_command, is_executable_file, parse_commandline
 
 # Directory that contains the desktop environment's `.menu`-files
@@ -33,7 +32,8 @@ def get_iconpath_for_commandline(cmdline, size, theme):
     """
     args = parse_commandline(cmdline)
     icon_name = guess_icon_name(args[0] if args else '')
-    return xdg.IconTheme.getIconPath(icon_name, size, theme)
+    path = xdg.IconTheme.getIconPath(icon_name, size, theme)
+    return convert(path, type(cmdline))
 
 def guess_icon_name(path, fallback=ICON_RUN):
     """
@@ -50,9 +50,7 @@ def guess_icon_name(path, fallback=ICON_RUN):
         name = ICON_EXECUTABLE
     else:
         name = fallback
-    if isinstance(path, altstring):
-        name = to_alternate_string(name)
-    return name
+    return convert(name, type(path))
 
 icon_cache = {}
 
@@ -88,9 +86,7 @@ def get_starter_icon(command, use_cache=True):
         icon = icons[command]
     except KeyError:
         return None
-    if isinstance(command, altstring):
-        icon = to_alternate_string(icon)
-    return icon
+    return convert(icon, type(command))
 
 def init_icon_cache():
     """
