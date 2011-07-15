@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # Stdlib
 import sys
+
 # 3rd party
 from PySide import QtGui
+
 # launchit package
-from . import core
+from . import core, icongetter
 
 class MarkedCompletionDelegate(QtGui.QItemDelegate):
     def __init__(self, start_mark='<b><u>', end_mark='</u></b>', parent=None):
@@ -73,10 +75,53 @@ class LaunchEdit(QtGui.QLineEdit):
     def launch(self):
         core.launch(self.text())
 
+class CommandIconLabel(QtGui.QLabel):
+    def __init__(self, icon_size=32, icon=QtGui.QIcon(), parent=None):
+        QtGui.QLabel.__init__(self, parent)
+        self.icon_size = icon_size
+        self.icon = icon
+
+    @property
+    def icon(self):
+        return self._icon
+
+    @icon.setter
+    def icon(self, icon):
+        width = height = self.icon_size
+        pixmap = icon.pixmap(width, height)
+        self.setPixmap(pixmap)
+        self._icon = icon
+
+    def set_icon_by_command(self, cmdline):
+        args = (cmdline, self.icon_size, QtGui.QIcon.themeName())
+        icon_path = icongetter.get_iconpath_for_commandline(*args)
+        if icon_path is None:
+            # TODO: Use fallback instead of empty icon
+            icon = QtGui.QIcon()
+        else:
+            icon = QtGui.QIcon(icon_path)
+        self.icon = icon
+
+class LaunchWidget(QtGui.QWidget):
+    def __init__(self, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+        layout = QtGui.QHBoxLayout()
+        self.icon_label = CommandIconLabel()
+        layout.addWidget(self.icon_label)
+        self.edit = LaunchEdit()
+        self.edit.textChanged.connect(self.update)
+        layout.addWidget(self.edit)
+        self.setLayout(layout)
+        # Start with empty state
+        self.update('')
+
+    def update(self, fragment):
+        self.icon_label.set_icon_by_command(fragment)
+
 def run_app(args=[]):
     app = QtGui.QApplication(args)
-    edit = LaunchEdit()
-    edit.show()
+    launcher = LaunchWidget()
+    launcher.show()
     return app.exec_()
 
 if __name__ == '__main__':
