@@ -9,6 +9,7 @@ from xdg.BaseDirectory import xdg_config_home
 # Default configuration
 config = {
     'encoding': 'utf-8',
+    'icon-theme': None,
     'menu-dir': '/etc/xdg/menus',
     'starter' : 'xdg-open',
 }

@@ -6,7 +6,7 @@ import sys
 from PySide import QtGui
 
 # launchit package
-from . import core, icongetter
+from . import core, icongetter, settings
 
 class MarkedCompletionDelegate(QtGui.QItemDelegate):
     def __init__(self, start_mark='<b><u>', end_mark='</u></b>', parent=None):
@@ -93,7 +93,12 @@ class CommandIconLabel(QtGui.QLabel):
         self._icon = icon
 
     def set_icon_by_command(self, cmdline):
-        args = (cmdline, self.icon_size, QtGui.QIcon.themeName())
+        # TODO: Implement theme detection for XFCE and LXDE, since these
+        #       are not supported by Qt's theme detection. Currently the
+        #       user must manually set the theme name inside launchit's
+        #       configuration file, if using an unsupported environment.
+        theme = settings.config['icon-theme'] or QtGui.QIcon.themeName()
+        args = (cmdline, self.icon_size, theme)
         icon_path = icongetter.get_iconpath_for_commandline(*args)
         if icon_path is None:
             # TODO: Use fallback instead of empty icon
