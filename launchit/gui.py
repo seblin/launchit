@@ -109,14 +109,15 @@ class LaunchWidget(QtGui.QWidget):
         self.icon_label = CommandIconLabel()
         layout.addWidget(self.icon_label)
         self.edit = LaunchEdit()
-        self.edit.textChanged.connect(self.update)
+        update_icon = self.icon_label.set_icon_by_command
+        self.edit.textChanged.connect(update_icon)
         layout.addWidget(self.edit)
         self.setLayout(layout)
         # Start with empty state
         self.update('')
 
     def update(self, fragment):
-        self.icon_label.set_icon_by_command(fragment)
+        self.edit.setText(fragment)
 
 def run_app(args=[]):
     app = QtGui.QApplication(args)
