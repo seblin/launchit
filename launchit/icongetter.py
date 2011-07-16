@@ -12,7 +12,7 @@ import xdg.Menu
 
 # launchit package
 from . import settings
-from ._stringutils import convert, to_native_string
+from ._stringutils import convert
 from .core import is_command, is_executable_file, parse_commandline
 
 # Directory that contains the desktop environment's `.menu`-files
@@ -110,11 +110,11 @@ def iter_command_icons():
     """
     for menu in iter_menu_files():
         for entry in iter_desktop_entries(menu):
-            exec_ = to_native_string(entry.getExec())
+            exec_ = convert(entry.getExec(), str)
             cmd = parse_commandline(exec_)[0]
             if is_command(cmd):
                 cmd = os.path.basename(cmd)
-            icon = to_native_string(entry.getIcon())
+            icon = convert(entry.getIcon(), str)
             yield (cmd, icon)
 
 # PyXDG-related helper functions
