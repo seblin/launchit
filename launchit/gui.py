@@ -134,5 +134,8 @@ def run_app(args=[]):
     launcher.show()
     return app.exec_()
 
-if __name__ == '__main__':
+def main():
     sys.exit(run_app(sys.argv))
+
+if __name__ == '__main__':
+    main()
