@@ -119,10 +119,14 @@ class LaunchWidget(QtGui.QWidget):
         layout.addWidget(self.edit)
         self.setLayout(layout)
         # Start with empty state
-        self.update('')
+        self.update()
 
-    def update(self, fragment):
-        self.edit.setText(fragment)
+    def update(self, fragment=None):
+        text = self.edit.text()
+        if fragment is None or fragment == text:
+            self.edit.textChanged.emit(text)
+        else:
+            self.edit.setText(fragment)
 
 def run_app(args=[]):
     app = QtGui.QApplication(args)
