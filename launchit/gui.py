@@ -118,7 +118,7 @@ class LaunchWidget(QtGui.QWidget):
         self.edit.textChanged.connect(update_icon)
         layout.addWidget(self.edit)
         self.setLayout(layout)
-        # Start with empty state
+        # Doing this will update the icon for empty state
         self.update()
 
     def update(self, fragment=None):
