@@ -75,8 +75,15 @@ class LaunchEdit(QtGui.QLineEdit):
     def launch(self):
         core.launch(self.text())
 
+class Icon(QtGui.QIcon):
+    def __init__(self, source_or_engine=None):
+        if not source_or_engine:
+            QtGui.QIcon.__init__(self)
+        else:
+            QtGui.QIcon.__init__(self, source_or_engine)
+
 class CommandIconLabel(QtGui.QLabel):
-    def __init__(self, icon_size=32, icon=QtGui.QIcon(), parent=None):
+    def __init__(self, icon_size=32, icon=Icon(), parent=None):
         QtGui.QLabel.__init__(self, parent)
         self.icon_size = icon_size
         self.icon = icon
@@ -100,12 +107,7 @@ class CommandIconLabel(QtGui.QLabel):
         theme = settings.config['icon-theme'] or QtGui.QIcon.themeName()
         args = (cmdline, self.icon_size, theme)
         icon_path = icongetter.get_iconpath_for_commandline(*args)
-        if icon_path is None:
-            # TODO: Use fallback instead of empty icon
-            icon = QtGui.QIcon()
-        else:
-            icon = QtGui.QIcon(icon_path)
-        self.icon = icon
+        self.icon = Icon(icon_path)
 
 class LaunchWidget(QtGui.QWidget):
     def __init__(self, parent=None):
