@@ -130,9 +130,10 @@ class LaunchWidget(QtGui.QWidget):
         else:
             self.edit.setText(fragment)
 
-def run_app(args=[]):
+def run_app(args=[], title='Launchit'):
     app = QtGui.QApplication(args)
     launcher = LaunchWidget()
+    launcher.setWindowTitle(title)
     launcher.show()
     return app.exec_()
 
