@@ -1,1 +1,1 @@
-from . import core, gui, icongetter
+from . import core, gui, icongetter, settings
