@@ -1,6 +1,6 @@
 """
-Converters and definitions for string handling on Python 2 and Python 3.
-(Not part of the launchit API)
+Abstractions to convert between native and alternate strings on Python 2 and 
+Python 3. (Not part of the launchit API)
 """
 # Stdlib
 import functools
