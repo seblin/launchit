@@ -22,6 +22,7 @@ MENU_DIR = settings.config['menu-dir']
 ICON_RUN = 'system-run'
 ICON_EXECUTABLE = 'application-x-executable'
 
+@keep_string_type
 def get_iconpath_for_commandline(cmdline, size, theme):
     """
     High-level function, which takes and parses the given `cmdline`.
