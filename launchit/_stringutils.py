@@ -3,7 +3,9 @@ Converters and definitions for string handling on Python 2 and Python 3.
 (Not part of the launchit API)
 """
 # Stdlib
+import functools
 import sys
+
 # Launchit package
 from . import settings
 
@@ -17,6 +19,21 @@ altstring = bytes if on_py3k else unicode
 
 # Abstract "type" for alternate and native strings (disappeared with Python 3)
 basestring = (str, altstring)
+
+def keep_string_type(wrapped_func):
+    """
+    A decorator, which guarantees, that the value returned by the wrapped
+    function will have the same string-type as the wrapped function's first 
+    argument has. If `wrapped_func` has no arguments or if the result is not
+    a string-type, then the original result of `wrapped_func` is returned.
+    """
+    @functools.wraps(wrapped_func)
+    def wrapper(*args, **kwargs):
+        result = wrapped_func(*args, **kwargs)
+        if args and isinstance(result, basestring):
+            result = convert(result, type(args[0]))
+        return result
+    return wrapper
 
 def convert(obj, out_type):
     """

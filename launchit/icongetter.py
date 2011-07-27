@@ -12,7 +12,7 @@ import xdg.Menu
 
 # launchit package
 from . import settings
-from ._stringutils import convert
+from ._stringutils import convert, keep_string_type
 from .core import is_command, is_executable_file, parse_commandline
 
 # Directory that contains the desktop environment's `.menu`-files
@@ -34,17 +34,16 @@ def get_iconpath_for_commandline(cmdline, size, theme):
     icon_name = guess_icon_name(args[0] if args else '')
     return get_iconpath(icon_name, size, theme)
 
+@keep_string_type
 def get_iconpath(icon_name, size, theme):
     """
     Return a path, which refers to an icon file with the given name 
     regarding to given `size` and `theme`. Return `None` if no icon
     path could be obtained.
     """
-    path = xdg.IconTheme.getIconPath(icon_name, size, theme)
-    if path is not None:
-        path = convert(path, type(icon_name))
-    return path
+    return xdg.IconTheme.getIconPath(icon_name, size, theme)
 
+@keep_string_type
 def guess_icon_name(path, fallback=ICON_RUN):
     """
     Return a suitable icon name for the given `path`. If `path` is a 
@@ -60,10 +59,11 @@ def guess_icon_name(path, fallback=ICON_RUN):
         name = ICON_EXECUTABLE
     else:
         name = fallback
-    return convert(name, type(path))
+    return name
 
 icon_cache = {}
 
+@keep_string_type
 def get_starter_icon(command, use_cache=True):
     """
     Return the associated icon for a given command. This is done by 
@@ -96,7 +96,7 @@ def get_starter_icon(command, use_cache=True):
         icon = icons[command]
     except KeyError:
         return None
-    return convert(icon, type(command))
+    return icon
 
 def init_icon_cache():
     """
