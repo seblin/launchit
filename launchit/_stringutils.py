@@ -48,7 +48,7 @@ def convert(obj, out_type):
     elif issubclass(out_type, str):
         return to_native_string(obj)
     else:
-        raise TypeError('out_type must be a string type')
+        raise TypeError('Cannot convert to non-string type')
 
 def to_alternate_string(obj):
     """
