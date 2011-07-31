@@ -41,8 +41,15 @@ def get_iconpath(icon_name, size, theme):
     Return a path, which refers to an icon file with the given name 
     regarding to given `size` and `theme`. Return `None` if no icon
     path could be obtained.
+
+    Note that `icon_name` may also be given as an absolute path name. 
+    It is then returned unchanged, if it exists, ignoring the values
+    for `size` and `theme`.
     """
-    return xdg.IconTheme.getIconPath(icon_name, size, theme)
+    path = xdg.IconTheme.getIconPath(icon_name, size, theme)
+    if not os.path.exists(path):
+        return None
+    return path
 
 @keep_string_type
 def guess_icon_name(path, fallback=ICON_RUN):
