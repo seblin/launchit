@@ -2,16 +2,20 @@
 import os
 import sys
 
-def get_full_path(path):
-    module_dir = os.path.dirname(__file__)
-    new_path = os.path.join(module_dir, path)
-    return os.path.abspath(new_path)
+# If this executable is invoked, but the launchit package was not installed 
+# on the user's system, it needs to put its parent path into `sys.path`, to 
+# assure that the subsequent import of launchit will not fail. However, in 
+# case that an installation was made before, adding this executable's parent
+# directory to the python path would result in nonsense (`/usr/bin/launchit` 
+# would become `/usr`). Hence, the parent path is checked for a sub-directory
+# named `launchit`, assuming that this is the launchit package and only then
+# a new entry is added to the beginning of `sys.path`. Note that this also
+# means that the executable, when invoked "locally", is guaranteed to use the 
+# "local" version of launchit, even if there is an existing installation.
 
-def main():
-    package_path = get_full_path('..')
-    sys.path.insert(0, package_path)
-    launchit = __import__('launchit')
-    launchit.gui.main()
+path = os.path.join(os.path.dirname(__file__), '..')
+if os.path.isdir(os.path.join(path, 'launchit')):
+    sys.path.insert(0, os.path.abspath(path))
 
-if __name__ == '__main__':
-    main()
+import launchit
+launchit.gui.main()
