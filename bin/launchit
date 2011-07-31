@@ -13,7 +13,7 @@ import sys
 # means that the executable, when invoked "locally", is guaranteed to use the 
 # "local" version of launchit, even if there is an existing installation.
 
-path = os.path.join(os.path.dirname(__file__), '..')
+path = os.path.join(os.path.dirname(__file__), os.pardir)
 if os.path.isdir(os.path.join(path, 'launchit')):
     sys.path.insert(0, os.path.abspath(path))
 
