@@ -18,6 +18,9 @@ from .core import is_command, is_executable_file, parse_commandline
 # Directory that contains the desktop environment's `.menu`-files
 MENU_DIR = settings.config['menu-dir']
 
+# File extensions as defined by XDG icon-theme spec
+ICONFILE_EXTENSIONS = ['png', 'svg', 'xpm']
+
 # Icon name constants (following XDG icon spec)
 ICON_RUN = 'system-run'
 ICON_EXECUTABLE = 'application-x-executable'
@@ -35,6 +38,14 @@ def get_iconpath_for_commandline(cmdline, size, theme):
     icon_name = guess_icon_name(args[0] if args else '')
     return get_iconpath(icon_name, size, theme)
 
+def is_iconfile(path):
+    """
+    Return `True` if `path` refers to an existing file with one of the 
+    file extensions defined by `ICONFILE_EXTENSIONS`, otherwise `False`.
+    """
+    extension = os.path.splitext(path)[1].strip(os.extsep)
+    return os.path.isfile(path) and extension in ICONFILE_EXTENSIONS
+
 @keep_string_type
 def get_iconpath(icon_name, size, theme):
     """
@@ -43,11 +54,12 @@ def get_iconpath(icon_name, size, theme):
     path could be obtained.
 
     Note that `icon_name` may also be given as an absolute path name. 
-    It is then returned unchanged, if it exists, ignoring the values
-    for `size` and `theme`.
+    It is then returned unchanged, if it is recognized as an icon file, 
+    ignoring the values for `size` and `theme`. If the path refers to
+    something else or if it does not exist, `None` will be returned.
     """
     path = xdg.IconTheme.getIconPath(icon_name, size, theme)
-    if not os.path.exists(path):
+    if not path or not is_iconfile(path):
         return None
     return path
 
