@@ -58,7 +58,8 @@ def get_iconpath(icon_name, size, theme):
     ignoring the values for `size` and `theme`. If the path refers to
     something else or if it does not exist, `None` will be returned.
     """
-    path = xdg.IconTheme.getIconPath(icon_name, size, theme)
+    path = xdg.IconTheme.getIconPath(
+        icon_name, size, theme, ICONFILE_EXTENSIONS)
     if not path or not is_iconfile(path):
         return None
     return path
