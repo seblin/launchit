@@ -147,6 +147,20 @@ def parse_commandline(cmdline):
         args = [convert(arg, altstring) for arg in args]
     return args
 
+def get_trimmed(path):
+    """
+    Trim a path, if possible, meaning that if `path` is recognized as a 
+    command, it is shortened to its basename. Otherwise `path` is returned
+    unchanged. In the latter case `path` must not necessarily refer to an
+    existing file, since no further checks are made on it.
+
+    Note that this function expects the given path to be of a string-type. 
+    If not, an exception is raised by one of its underlying functions.
+    """
+    if is_command(path):
+        path = os.path.basename(path)
+    return path
+
 def is_command(name):
     """
     Return True if given name refers to an existing file in one of the

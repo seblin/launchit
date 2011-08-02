@@ -13,7 +13,8 @@ import xdg.Menu
 # launchit package
 from . import settings
 from ._stringutils import convert, keep_string_type
-from .core import is_command, is_executable_file, parse_commandline
+from .core import (
+    get_trimmed, is_command, is_executable_file, parse_commandline)
 
 # Directory that contains the desktop environment's `.menu`-files
 MENU_DIR = settings.config['menu-dir']
@@ -111,10 +112,8 @@ def get_starter_icon(command, use_cache=True):
         icons = icon_cache
     else:
         icons = dict(iter_command_icons())
-    if is_command(command):
-        command = os.path.basename(command)
     try:
-        icon = icons[command]
+        icon = icons[get_trimmed(command)]
     except KeyError:
         return None
     return icon
@@ -141,10 +140,8 @@ def iter_command_icons():
         for entry in iter_desktop_entries(menu):
             exec_ = convert(entry.getExec(), str)
             cmd = parse_commandline(exec_)[0]
-            if is_command(cmd):
-                cmd = os.path.basename(cmd)
             icon = convert(entry.getIcon(), str)
-            yield (cmd, icon)
+            yield (get_trimmed(cmd), icon)
 
 # PyXDG-related helper functions
 
