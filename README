@@ -1,9 +1,22 @@
 Launchit's current state is more or less just a basic idea like how a launcher 
-could be implemented in Python. Launchit needs at least Python 2.6 and PySide 
-to be installed in order to run. It is currently focused on Linux systems, 
-where xdg-open is used to detect the desired program, when a non-executable 
-file is needed to be invoked. Since Launchit separates its internal logic from 
-the graphical presentation, it is possible to run it without PySide, just using
-core.py as a stand-alone file. However, to do tests inside the (yet poorly 
-implemented) GUI, user's may run `python -m launchit.gui` from a terminal,
-assuming that Launchit was copied in a subfolder named "launchit".
+could be implemented in Python. Some of its features include the following:
+
+* Launchit is able to suggest possible completions for given fragments. 
+  The fragment itself will then appear as marked (i.e. underlined and bold) 
+  inside the completion.
+
+* Launchit supports icon name guessing, when a completion is selected. 
+  Currently an appropriate icon is retrieved by a look inside the user's 
+  menu entries. More abilities will follow...
+
+* Various file-types are launched inside the user's preferred application,
+  using the desktop environment's specific launcher to make the right choice.
+
+Launchit depends on PyXDG and PySide. Unfortunately, both do not (yet) support
+Python 3.x, so Launchit only runs under Python 2.x (at least 2.6).
+
+Note that Launchit is focused on Linux systems. Support for other platforms
+(e.g. Windows) may be implemented at a later state.
+
+You can test Launchit by just running its GUI via the repo's `bin/launchit` 
+file. Feel free to give some feedback on it. :-)
