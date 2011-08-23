@@ -80,7 +80,7 @@ def is_iconfile(path):
     Return `True` if `path` refers to an existing file with one of the 
     file extensions defined by `ICONFILE_EXTENSIONS`, otherwise `False`.
     """
-    extension = os.path.splitext(path)[1].strip(os.extsep)
+    extension = os.path.splitext(path)[1].lstrip(os.extsep)
     return os.path.isfile(path) and extension in ICONFILE_EXTENSIONS
 
 icon_cache = {}
