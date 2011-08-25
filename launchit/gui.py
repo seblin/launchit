@@ -11,6 +11,10 @@ from PySide import QtGui
 # Launchit package
 from . import core, icongetter, settings
 
+# TODO: Don't rely on Qt's detection
+# The theme, which is used to retrieve an icon
+ICON_THEME = settings.config['icon-theme'] or QtGui.QIcon.themeName()
+
 class CompletionMarkupBuilder(object):
     """
     This class is responsible for the markup, which is used to show
@@ -219,14 +223,11 @@ class CommandIconLabel(QtGui.QLabel):
 
     def set_icon_by_command(self, cmdline):
         """
-        Show an icon corresponding to `cmdline`s first argument.
+        Show an icon corresponding to `cmdline`s first argument. Note
+        that the icon is retrieved by using the theme name, which is 
+        given as `gui.ICON_THEME`.
         """
-        # TODO: Implement theme detection for XFCE and LXDE, since these
-        #       are not supported by Qt's theme detection. Currently the
-        #       user must manually set the theme name inside launchit's
-        #       configuration file, if using an unsupported environment.
-        theme = settings.config['icon-theme'] or QtGui.QIcon.themeName()
-        args = (cmdline, self.icon_size, theme)
+        args = (cmdline, self.icon_size, ICON_THEME)
         icon_path = icongetter.get_iconpath_for_commandline(*args)
         self.icon = Icon(icon_path)
 
