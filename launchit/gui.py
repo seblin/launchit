@@ -174,35 +174,18 @@ class LaunchEdit(QtGui.QLineEdit):
         """
         core.launch(self.text())
 
-class Icon(QtGui.QIcon):
-    """
-    This class is intended for scalable icons.
-    """
-    def __init__(self, source_or_engine=None):
-        """
-        Takes `source_or_engine` to determine the icon to use. If
-        this is `None`, then initialization is made without an icon.
-        Otherwise the argument may be an icon path given as a string, 
-        a `QIcon()`-like class, a `QPixmap()` or a `QIconEngine()`.
-        """
-        if not source_or_engine:
-            QtGui.QIcon.__init__(self)
-        else:
-            QtGui.QIcon.__init__(self, source_or_engine)
-
 class CommandIconLabel(QtGui.QLabel):
     """
     A label, which holds an icon to represent a command.
     """
-    def __init__(self, icon_size=32, icon=Icon(), parent=None):
+    def __init__(self, icon_size=32, parent=None):
         """
-        Takes `icon_size`, which should hold the size to use as an 
-        integer and an `Icon()` or a `QIcon()`-like class in order 
-        to determine the icon, which should appear inside the label.
+        Takes `icon_size`, which should be an integer to define the
+        maximal size of an icon inside the label.
         """
         QtGui.QLabel.__init__(self, parent)
         self.icon_size = icon_size
-        self.icon = icon
+        self._icon = QtGui.QIcon()
 
     @property
     def icon(self):
@@ -221,6 +204,18 @@ class CommandIconLabel(QtGui.QLabel):
         self.setPixmap(pixmap)
         self._icon = icon
 
+    def update_icon(self, path):
+        """
+        Update the icon inside the label based on `path`. Note that
+        `path` should refer to an existing icon file. If it is `None`,
+        then an empty icon is set on the label.
+        """
+        if path is None:
+            icon = QtGui.QIcon()
+        else:
+            icon = QtGui.QIcon(path)
+        self.icon = icon
+
     def set_icon_by_command(self, cmdline):
         """
         Show an icon corresponding to `cmdline`s first argument. Note
@@ -229,7 +224,7 @@ class CommandIconLabel(QtGui.QLabel):
         """
         args = (cmdline, self.icon_size, ICON_THEME)
         icon_path = icongetter.get_iconpath_for_commandline(*args)
-        self.icon = Icon(icon_path)
+        self.update_icon(icon_path)
 
 class LaunchWidget(QtGui.QWidget):
     """
