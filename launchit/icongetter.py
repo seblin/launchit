@@ -71,7 +71,7 @@ def get_iconpath(icon_name, size, theme):
     """
     path = xdg.IconTheme.getIconPath(
         icon_name, size, theme, ICONFILE_EXTENSIONS)
-    if not path or not is_iconfile(path):
+    if path is None or not is_iconfile(path):
         return None
     return path
 
