@@ -239,16 +239,24 @@ class LaunchWidget(QtGui.QWidget):
         appropriated icon is shown.
         """
         QtGui.QWidget.__init__(self, parent)
-        layout = QtGui.QHBoxLayout()
         self.icon_label = CommandIconLabel()
-        layout.addWidget(self.icon_label)
-        self.edit = LaunchEdit()
         update_icon = self.icon_label.set_icon_by_command
+        self.edit = LaunchEdit()
         self.edit.textChanged.connect(update_icon)
-        layout.addWidget(self.edit)
-        self.setLayout(layout)
+        self._make_layout([self.icon_label, self.edit])
         # Doing this will update the icon for empty state
-        self.update()
+        self.update() # XXX: Need to get rid of this
+
+    def _make_layout(self, widgets):
+        """
+        Create a horizontal layout and fill it with `widgets` with respect 
+        to the order in which the widgets are given. Finally set the layout 
+        to the `LaunchWidget()`.
+        """
+        layout = QtGui.QHBoxLayout()
+        for widget in widgets:
+            layout.addWidget(widget)
+        self.setLayout(layout)
 
     def update(self, fragment=None):
         """
