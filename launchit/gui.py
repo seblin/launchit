@@ -244,8 +244,7 @@ class LaunchWidget(QtGui.QWidget):
         self.edit = LaunchEdit()
         self.edit.textChanged.connect(update_icon)
         self._make_layout([self.icon_label, self.edit])
-        # Doing this will update the icon for empty state
-        self.update() # XXX: Need to get rid of this
+        update_icon(self.edit.text())
 
     def _make_layout(self, widgets):
         """
@@ -257,20 +256,6 @@ class LaunchWidget(QtGui.QWidget):
         for widget in widgets:
             layout.addWidget(widget)
         self.setLayout(layout)
-
-    def update(self, fragment=None):
-        """
-        Update the widget based on `fragment`. This is simply done by
-        emitting an appropriated signal with the new fragment as an
-        argument in order to let the other parts know about the change.
-        If `fragment` is `None`, then the current contents of the text
-        field are used as the fragment.
-        """
-        text = self.edit.text()
-        if fragment is None or fragment == text:
-            self.edit.textChanged.emit(text)
-        else:
-            self.edit.setText(fragment)
 
 def run_app(args=[], title='Launchit'):
     """
