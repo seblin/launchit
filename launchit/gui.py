@@ -220,7 +220,7 @@ class CommandIconLabel(QtGui.QLabel):
         """
         Show an icon corresponding to `cmdline`s first argument. Note
         that the icon is retrieved by using the theme name, which is 
-        given as `gui.ICON_THEME`.
+        given by `gui.ICON_THEME`.
         """
         args = (cmdline, self.icon_size, ICON_THEME)
         icon_path = icongetter.get_iconpath_for_commandline(*args)
@@ -228,9 +228,9 @@ class CommandIconLabel(QtGui.QLabel):
 
 class LaunchWidget(QtGui.QWidget):
     """
-    Provides an editable text field, where a command may be typed in.
-    In addition, an icon suitable for that command will be shown beside
-    the text field.
+    Provides an editable text field, into which a command may be typed 
+    in. In addition, an icon suitable for that command will be shown 
+    beside the text field.
     """
     def __init__(self, parent=None):
         """
