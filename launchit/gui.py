@@ -79,7 +79,7 @@ class MarkedCompletionDelegate(QtGui.QItemDelegate):
         """
         QtGui.QItemDelegate.__init__(self, parent)
         self.markup_builder = markup_builder
-        self._renderer = QtGui.QTextDocument()
+        self._renderer = QtGui.QTextDocument(parent=self)
         self.fragment = ''
 
     def paint(self, painter, option, index):
@@ -138,9 +138,9 @@ class CommandlineCompleter(QtGui.QCompleter):
         QtGui.QCompleter.__init__(self, parent)
         mode = self.UnfilteredPopupCompletion
         self.setCompletionMode(mode)
-        model = QtGui.QStringListModel()
+        model = QtGui.QStringListModel(parent=self)
         self.setModel(model)
-        delegate = MarkedCompletionDelegate()
+        delegate = MarkedCompletionDelegate(parent=self.popup())
         self.popup().setItemDelegate(delegate)
 
     def update(self, fragment):
@@ -163,7 +163,7 @@ class LaunchEdit(QtGui.QLineEdit):
         will invoke the command.
         """
         QtGui.QLineEdit.__init__(self, parent)
-        completer = CommandlineCompleter()
+        completer = CommandlineCompleter(parent=self)
         self.textEdited.connect(completer.update)
         self.setCompleter(completer)
         self.returnPressed.connect(self.launch)
@@ -185,7 +185,7 @@ class CommandIconLabel(QtGui.QLabel):
         """
         QtGui.QLabel.__init__(self, parent)
         self.icon_size = icon_size
-        self._icon = QtGui.QIcon()
+        self._icon = QtGui.QIcon(parent=self)
 
     @property
     def icon(self):
@@ -211,9 +211,9 @@ class CommandIconLabel(QtGui.QLabel):
         then an empty icon is set on the label.
         """
         if path is None:
-            icon = QtGui.QIcon()
+            icon = QtGui.QIcon(parent=self)
         else:
-            icon = QtGui.QIcon(path)
+            icon = QtGui.QIcon(path, parent=self)
         self.icon = icon
 
     def set_icon_by_command(self, cmdline):
@@ -239,9 +239,9 @@ class LaunchWidget(QtGui.QWidget):
         appropriated icon is shown.
         """
         QtGui.QWidget.__init__(self, parent)
-        self.icon_label = CommandIconLabel()
+        self.icon_label = CommandIconLabel(parent=self)
         update_icon = self.icon_label.set_icon_by_command
-        self.edit = LaunchEdit()
+        self.edit = LaunchEdit(parent=self)
         self.edit.textChanged.connect(update_icon)
         self._make_layout([self.icon_label, self.edit])
         update_icon(self.edit.text())
@@ -252,7 +252,7 @@ class LaunchWidget(QtGui.QWidget):
         to the order in which the widgets are given. Finally set the layout 
         to the `LaunchWidget()`.
         """
-        layout = QtGui.QHBoxLayout()
+        layout = QtGui.QHBoxLayout(self)
         for widget in widgets:
             layout.addWidget(widget)
         self.setLayout(layout)
