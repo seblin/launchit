@@ -6,7 +6,7 @@ Graphical user-interface made with PySide.
 import sys
 
 # 3rd party
-from PySide import QtGui
+from PySide import QtCore, QtGui
 
 # Launchit package
 from . import core, icongetter, settings
@@ -125,11 +125,24 @@ class MarkedCompletionDelegate(QtGui.QItemDelegate):
         """
         return self._renderer.size().toSize()
 
+class MarkedCompletionsView(QtGui.QListView):
+    def __init__(self, parent=None):
+        QtGui.QListView.__init__(self, parent)
+        delegate = MarkedCompletionDelegate(parent=self)
+        self.setItemDelegate(delegate)
+
+    def update_fragment(self, fragment):
+        print 'update_fragment(%r)' % fragment
+        self.itemDelegate().fragment = fragment
+
+
 class CommandlineCompleter(QtGui.QCompleter):
     """
     This class provides and handles the popup, which shows the possible
     completions for a given fragment. It is used by `LaunchEdit()`.
     """
+    fragment_updated = QtCore.Signal(basestring)
+
     def __init__(self, parent=None):
         """
         Setup the completer. `MarkedCompletionDelegate()` is used to show 
@@ -140,8 +153,9 @@ class CommandlineCompleter(QtGui.QCompleter):
         self.setCompletionMode(mode)
         model = QtGui.QStringListModel(parent=self)
         self.setModel(model)
-        delegate = MarkedCompletionDelegate(parent=self.popup())
-        self.popup().setItemDelegate(delegate)
+        popup = MarkedCompletionsView()
+        self.fragment_updated.connect(popup.update_fragment)
+        self.setPopup(popup)
 
     def update(self, fragment):
         """
@@ -150,7 +164,7 @@ class CommandlineCompleter(QtGui.QCompleter):
         """
         completions = core.get_name_completions(fragment)
         self.model().setStringList(completions)
-        self.popup().itemDelegate().fragment = fragment
+        self.fragment_updated.emit(fragment)
 
 class LaunchEdit(QtGui.QLineEdit):
     """
