@@ -68,10 +68,11 @@ class MarkedCompletionDelegate(QtGui.QItemDelegate):
     """
     def __init__(self, markup_builder=CompletionMarkupBuilder(), parent=None):
         """
-        A new instance will have its `fragment`-attribute initially set 
-        to an empty string. That attribute is intended to be changed from 
-        "outside", whenever an appropriated event occurs (e.g. user has 
-        typed a new character to the commandline).
+        A new instance will have its `.fragment`-attribute, on which the
+        marking of a completion is based, initially set to an empty string. 
+        Whenever the fragment is needed to be changed (e.g. user has typed 
+        a new character to the commandline), the `.update_fragment()`-method 
+        may be used as a callback/slot in order to set the new fragment.
 
         The `markup_builder` will be used to generate the corresponding
         markup in order to render the completion entry. It is assumed to
