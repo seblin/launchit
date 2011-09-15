@@ -6,10 +6,11 @@ Graphical user-interface made with PySide.
 import sys
 
 # 3rd party
-from PySide import QtGui
+from PySide import QtCore, QtGui
 
 # Launchit package
 from . import core, icongetter, settings
+from ._stringutils import altstring, basestring
 
 # TODO: Don't rely on Qt's detection
 # The theme, which is used to retrieve an icon
@@ -82,6 +83,15 @@ class MarkedCompletionDelegate(QtGui.QItemDelegate):
         self._renderer = QtGui.QTextDocument(parent=self)
         self.fragment = ''
 
+    def update_fragment(self, fragment):
+        """
+        Update the fragment, which is marked inside each completion, with
+        the given new `fragment`.
+        """
+        if not isinstance(fragment, basestring):
+            raise TypeError('fragment must be a string')
+        self.fragment = fragment
+
     def paint(self, painter, option, index):
         """
         Reimplemented method to draw a completion entry. This makes use
@@ -130,10 +140,17 @@ class CommandlineCompleter(QtGui.QCompleter):
     This class provides and handles the popup, which shows the possible
     completions for a given fragment. It is used by `LaunchEdit()`.
     """
+    fragment_updated = QtCore.Signal([str], [altstring])
+
     def __init__(self, parent=None):
         """
         Setup the completer. `MarkedCompletionDelegate()` is used to show 
         an entry.
+
+        Note that a `fragment_updated`-signal is emitted, whenever the
+        underlying fragment for this completer has changed. This makes the
+        delegate, which is connected to that signal, able to change its
+        internal "marking state" needed to draw each completion correctly.
         """
         QtGui.QCompleter.__init__(self, parent)
         mode = self.UnfilteredPopupCompletion
@@ -141,16 +158,18 @@ class CommandlineCompleter(QtGui.QCompleter):
         model = QtGui.QStringListModel(parent=self)
         self.setModel(model)
         delegate = MarkedCompletionDelegate(parent=self.popup())
+        self.fragment_updated.connect(delegate.update_fragment)
         self.popup().setItemDelegate(delegate)
 
     def update(self, fragment):
         """
         Update the list of possible completions based on `fragment` and 
-        inform the delegate that it has to mark a new fragment.
+        emit a `fragment_updated`-signal, using the new fragment as the 
+        signal's argument.
         """
         completions = core.get_name_completions(fragment)
         self.model().setStringList(completions)
-        self.popup().itemDelegate().fragment = fragment
+        self.fragment_updated.emit(fragment)
 
 class LaunchEdit(QtGui.QLineEdit):
     """
