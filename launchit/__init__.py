@@ -13,4 +13,4 @@ __author__ = 'Sebastian Linke'
 __license__ = 'MIT'
 __version__ = '0.1-dev'
 
-from . import core, gui, icongetter, settings
+from . import core, gui, icongetter, logger, settings
