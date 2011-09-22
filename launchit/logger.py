@@ -3,8 +3,8 @@ Common interface for propagating logable messages.
 """
 import logging
 
-# Default name for the `global_logger`
-DEFAULT_GLOBAL_LOGGER_NAME = 'Launchit'
+# Name to use for the `LOGGER`
+DEFAULT_LOGGER_NAME = 'Launchit'
 
 def get_console_logger(name, format='%(name)s: [%(levelname)s] %(message)s'):
     """
@@ -20,24 +20,35 @@ def get_console_logger(name, format='%(name)s: [%(levelname)s] %(message)s'):
     logger.addHandler(stream_handler)
     return logger
 
-# Used by `info()`, `warning()` and `error()` in order to provide a simplified
-# way for other modules, when they need to show status messages.
-global_logger = get_console_logger(DEFAULT_GLOBAL_LOGGER_NAME)
+# Used for access on module-level by `info()`, `warning()` and `error()` in 
+# order to provide a simplified way for other modules, when they need to show 
+# status messages. A `logging`-compatible object is expected here.
+LOGGER = get_console_logger(DEFAULT_LOGGER_NAME)
+
+# Flag to indicate whether logging should be done
+SHOULD_LOG = False
+
+def _log(level, message):
+    """
+    Log `message` with `level` on `LOGGER` if `SHOULD_LOG` is `True`.
+    """
+    if SHOULD_LOG:
+        LOGGER.log(level, message)
 
 def info(message):
     """
-    Log a message with logging level `INFO` on the `global_logger`.
+    Log a `message` with logging level `INFO` on the `LOGGER`.
     """
-    global_logger.info(message)
+    _log(logging.INFO, message)
 
 def warning(message):
     """
-    Log a message with logging level `WARNING` on the `global_logger`.
+    Log a `message` with logging level `WARNING` on the `LOGGER`.
     """
-    global_logger.warning(message)
+    _log(logging.WARNING, message)
 
 def error(message):
     """
-    Log a message with logging level `ERROR` on the `global_logger`.
+    Log a `message` with logging level `ERROR` on the `LOGGER`.
     """
-    global_logger.error(message)
+    _log(logging.ERROR, message)
