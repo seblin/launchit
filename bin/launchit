@@ -2,20 +2,22 @@
 import os
 import sys
 
-# If this executable is invoked, but the launchit package was not installed 
-# on the user's system, it needs to put its parent path into `sys.path`, to 
-# assure that the subsequent import of launchit will not fail. However, in 
-# case that an installation was made before, adding this executable's parent
-# directory to the python path would result in nonsense (`/usr/bin/launchit` 
-# would become `/usr`). Hence, the parent path is checked for a sub-directory
-# named `launchit`, assuming that this is the launchit package and only then
-# a new entry is added to the beginning of `sys.path`. Note that this also
-# means that the executable, when invoked "locally", is guaranteed to use the 
-# "local" version of launchit, even if there is an existing installation.
+# This executable may be invoked without a prior installation of launchit. 
+# But since it depends on the `launchit` package, doing so would raise an 
+# `ImportError`, because the executable, if still living in `/bin`, is not 
+# part of the package structure. Adding the executable's parent directory 
+# to `sys.path` will help python to find it (still assuming that the file
+# hierarchy of this repository wasn't changed). But then, one problem still 
+# remains: After being installed, the executable's path is usually something
+# like `/usr/bin/launchit` (or `/usr/local/bin/launchit`) and using its parent 
+# path (e.g. `/usr`) is kind of nonsense. To avoid that case, the parent path 
+# is always checked for a sub-directory with the name `launchit`, which is 
+# assumed to represent the package. If this is true, the path entry is added. 
+# If not, the python path is left unchanged.
 
-path = os.path.join(os.path.dirname(__file__), os.pardir)
-if os.path.isdir(os.path.join(path, 'launchit')):
-    sys.path.insert(0, os.path.abspath(path))
+parent = os.path.join(os.path.dirname(__file__), os.pardir)
+if os.path.isdir(os.path.join(parent, 'launchit')):
+    sys.path.insert(0, os.path.abspath(parent))
 
 import launchit
 launchit.gui.main()
