@@ -16,28 +16,33 @@ config = {
 
 CONFIG_FILENAME = 'launchit.conf'
 
-def get_user_config(filename=CONFIG_FILENAME):
+def get_user_config(filename=None):
     """
     Return the parsed contents of a configuration file, which is named with
     `filename`, as a dictionary, where the file is assumed to exist inside 
     the user's "standard" configuration directory. In case that no such file
-    could be found, an empty dictionary will be returned. 
+    could be found, an empty dictionary will be returned. If `filename` is 
+    `None`, the `CONFIG_FILENAME` is used.
 
     Note that a detailed explanation of the expected scheme inside the config
     file can be found in `iter_config_entries()`, while the config file's path 
     is retrieved by `get_config_path()`.
     """
+    if filename is None:
+        filename = CONFIG_FILENAME
     path = get_config_path(filename)
     if not os.path.exists(path):
         return {}
     return get_config_entries(path)
 
-def get_config_path(filename=CONFIG_FILENAME):
+def get_config_path(filename=None):
     """
-    Return a XDG-compliant path pointing to the place where the given 
-    configuration file should be stored.
+    Return a XDG-compliant path based on given `filename`. If `filename` is 
+    `None`, the `CONFIG_FILENAME` will be used.
     """
     # TODO: Determinate the correct path on non-linux platforms, too
+    if filename is None:
+        filename = CONFIG_FILENAME
     if os.path.dirname(filename):
         raise ValueError('filename may not contain any path separator')
     return os.path.join(xdg_config_home, filename)
