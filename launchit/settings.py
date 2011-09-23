@@ -14,7 +14,9 @@ config = {
     'starter' : 'xdg-open',
 }
 
-def get_user_config(filename='launchit.conf'):
+CONFIG_FILENAME = 'launchit.conf'
+
+def get_user_config(filename=CONFIG_FILENAME):
     """
     Return the parsed contents of a configuration file, which is named with
     `filename`, as a dictionary, where the file is assumed to exist inside 
@@ -30,7 +32,7 @@ def get_user_config(filename='launchit.conf'):
         return {}
     return get_config_entries(path)
 
-def get_config_path(filename='launchit.conf'):
+def get_config_path(filename=CONFIG_FILENAME):
     """
     Return a XDG-compliant path pointing to the place where the given 
     configuration file should be stored.
