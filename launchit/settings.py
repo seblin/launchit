@@ -16,6 +16,18 @@ config = {
 
 CONFIG_FILENAME = 'launchit.conf'
 
+def update_config(configuration={}):
+    """
+    Update default configuration with the result of `get_user_config()` and 
+    after that with the given `configuration`-dictionary. 
+
+    "Updating" means: If the same key exists in at least two dictionaries,
+    then the latter one's value is used. Otherwise the key is just added.
+    Thus, an empty dictionary will result in no change.
+    """
+    for cfg in (get_user_config(), configuration):
+        config.update(cfg)
+
 def get_user_config(filename=None):
     """
     Return the parsed contents of a configuration file, which is named with
@@ -81,5 +93,4 @@ def iter_config_entries(lines):
             key, value = code.split(':', 1)
             yield (key.strip(), value.strip())
 
-# This is where user-defined values may come in
-config.update(get_user_config())
+update_config()
