@@ -92,5 +92,3 @@ def iter_config_entries(lines):
                 raise ValueError(msg.format(index + 1))
             key, value = code.split(':', 1)
             yield (key.strip(), value.strip())
-
-update_config()

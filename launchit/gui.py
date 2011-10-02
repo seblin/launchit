@@ -12,10 +12,6 @@ from PySide import QtCore, QtGui
 from . import core, icongetter, settings
 from ._stringutils import altstring, basestring
 
-# TODO: Don't rely on Qt's detection
-# The theme, which is used to retrieve an icon
-ICON_THEME = settings.config['icon-theme'] or QtGui.QIcon.themeName()
-
 class CompletionMarkupBuilder(object):
     """
     This class is responsible for the markup, which is used to show
@@ -238,11 +234,10 @@ class CommandIconLabel(QtGui.QLabel):
 
     def set_icon_by_command(self, cmdline):
         """
-        Show an icon corresponding to `cmdline`s first argument. Note
-        that the icon is retrieved by using the theme name, which is 
-        given by `gui.ICON_THEME`.
+        Show an icon corresponding to `cmdline`s first argument.
         """
-        args = (cmdline, self.icon_size, ICON_THEME)
+        theme = settings.config['icon-theme'] or QtGui.QIcon.themeName()
+        args = (cmdline, self.icon_size, theme)
         icon_path = icongetter.get_iconpath_for_commandline(*args)
         self.update_icon(icon_path)
 

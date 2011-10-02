@@ -21,4 +21,5 @@ if os.path.isdir(os.path.join(parent, 'launchit')):
 
 import launchit
 launchit.logger.SHOULD_LOG = True
+launchit.settings.update_config()
 launchit.gui.main()
