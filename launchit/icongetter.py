@@ -10,14 +10,11 @@ import warnings
 import xdg.IconTheme
 import xdg.Menu
 
-# launchit package
+# Launchit package
 from . import settings
 from ._stringutils import convert, keep_string_type
 from .core import (
     get_trimmed, is_command, is_executable_file, parse_commandline)
-
-# Directory that contains the desktop environment's `.menu`-files
-MENU_DIR = settings.config['menu-dir']
 
 # File extensions as defined by XDG icon-theme spec
 ICONFILE_EXTENSIONS = ['png', 'svg', 'xpm']
@@ -147,12 +144,11 @@ def iter_command_icons():
 
 def iter_menu_files():
     """
-    Iterate through the `.menu`-files found in the globally defined 
-    MENU_DIR and yield a `xdg.Menu.Menu` object for each file. Each 
-    of those objects will then contain the `.menu`-file's entries in 
-    a parsed structure.
+    Iterate through the user's `.menu`-files and yield a `xdg.Menu.Menu` 
+    object for each file to provide its entries as a parsed structure.
     """
-    menu_files = os.path.join(MENU_DIR, '*.menu')
+    menu_dir = settings.config['menu-dir']
+    menu_files = os.path.join(menu_dir, '*.menu')
     for menu_file in glob.glob(menu_files):
         with warnings.catch_warnings():
             # Suppress a warning that may occur, when parsing KDE entries
