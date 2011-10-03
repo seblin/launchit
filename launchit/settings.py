@@ -47,7 +47,7 @@ def get_user_config(filename=None):
     path = get_config_path(filename)
     if not os.path.exists(path):
         return {}
-    logger.info('Using config file {0!r}'.format(path))
+    logger.info('Found config file {0!r}'.format(path))
     return get_config_entries(path)
 
 def get_config_path(filename=None):
