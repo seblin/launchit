@@ -28,6 +28,20 @@ LOGGER = get_console_logger(DEFAULT_LOGGER_NAME)
 # Flag to indicate whether logging should be done
 SHOULD_LOG = False
 
+def enable():
+    """
+    Enable logging.
+    """
+    global SHOULD_LOG
+    SHOULD_LOG = True
+
+def disable():
+    """
+    Disable logging.
+    """
+    global SHOULD_LOG
+    SHOULD_LOG = False
+
 def _log(level, message):
     """
     Log `message` with `level` on `LOGGER` if `SHOULD_LOG` is `True`.
