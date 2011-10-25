@@ -37,18 +37,17 @@ def keep_string_type(wrapped_func):
 
 def convert(obj, out_type):
     """
-    Convert `obj` to an instance of `out_type` and return the result. 
-
-    Note that `out_type` must be a string type, otherwise an exception is 
-    raised. If `out_type` is an inherited string type, its corresponding
-    built-in type is used.
+    Convert `obj` to an instance of `out_type`, where `out_type` must be a
+    string type and return the result. If `out_type` is not a string type, 
+    a `TypeError` is raised.
     """
     if issubclass(out_type, altstring):
-        return to_alternate_string(obj)
+        result = to_alternate_string(obj)
     elif issubclass(out_type, str):
-        return to_native_string(obj)
+        result = to_native_string(obj)
     else:
         raise TypeError('Cannot convert to non-string type')
+    return out_type(result)
 
 def to_alternate_string(obj):
     """
