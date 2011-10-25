@@ -6,7 +6,7 @@ import logging
 # Name to use for the `LOGGER`
 DEFAULT_LOGGER_NAME = 'Launchit'
 
-def get_console_logger(name, format='%(name)s: [%(levelname)s] %(message)s'):
+def get_console_logger(name, format='%(name)s: %(message)s'):
     """
     Return a logger with the given `name`, which is able to write messages to 
     a terminal's `stderr`-stream by using the given `format`. See the `logging`
