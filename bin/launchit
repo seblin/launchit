@@ -20,6 +20,6 @@ if os.path.isdir(os.path.join(parent, 'launchit')):
     sys.path.insert(0, os.path.abspath(parent))
 
 import launchit
-launchit.logger.enable()
+launchit.logger.enable(os.path.basename(__file__))
 launchit.settings.update_config()
 launchit.gui.main()

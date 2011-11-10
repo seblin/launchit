@@ -3,50 +3,57 @@ Common interface for propagating logable messages.
 """
 import logging
 
-# Name to use for the `LOGGER`
-DEFAULT_LOGGER_NAME = 'Launchit'
-
-def get_console_logger(name, format='%(name)s: %(message)s'):
+def set_console_handler(logger, format):
     """
-    Return a logger with the given `name`, which is able to write messages to 
-    a terminal's `stderr`-stream by using the given `format`. See the `logging`
-    module's documentation for details.
+    Create a `logging.StreamHandler()`, which is able to write to `stderr` and 
+    pass given `format` to that handler for output messages. Add the handler to 
+    `logger` and return the logger.
+    """
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter(format)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    return logger
+
+def get_logger(name, format='%(name)s: %(message)s'):
+    """
+    Request a logger from Python's `logging`-module by using the given `name`. 
+    If the resulting logger object does already have at least one handler, it
+    is returned unchanged. Otherwise a console handler will be added to it and 
+    given `format` will be passed to that handler. In addition, logging level
+    will be set to `logging.INFO`.
     """
     logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
-    stream_handler = logging.StreamHandler()
-    formatter = logging.Formatter(format)
-    stream_handler.setFormatter(formatter)
-    logger.addHandler(stream_handler)
+    if not logger.handlers:
+        logger = set_console_handler(logger, format)
+        logger.setLevel(logging.INFO)
     return logger
 
 # Used for access on module-level by `info()`, `warning()` and `error()` in 
 # order to provide a simplified way for other modules, when they need to show 
-# status messages. A `logging`-compatible object is expected here.
-LOGGER = get_console_logger(DEFAULT_LOGGER_NAME)
+# status messages. A `logging`-compatible object is expected here. When this
+# is `None`, it is assumed, that no logging is desired.
+LOGGER = None
 
-# Flag to indicate whether logging should be done
-SHOULD_LOG = False
-
-def enable():
+def enable(name='Launchit'):
     """
-    Enable logging.
+    Enable logging by setting a logger with the given `name` as `LOGGER`.
     """
-    global SHOULD_LOG
-    SHOULD_LOG = True
+    global LOGGER
+    LOGGER = get_logger(name)
 
 def disable():
     """
-    Disable logging.
+    Disable logging. This is setting `LOGGER` to `None`.
     """
-    global SHOULD_LOG
-    SHOULD_LOG = False
+    global LOGGER
+    LOGGER = None
 
 def _log(level, message):
     """
-    Log `message` with `level` on `LOGGER` if `SHOULD_LOG` is `True`.
+    Log `message` with `level` on `LOGGER`. Do nothing, if `LOGGER` is `None`.
     """
-    if SHOULD_LOG:
+    if LOGGER is not None:
         LOGGER.log(level, message)
 
 def info(message):
