@@ -213,7 +213,8 @@ class CommandIconLabel(QtGui.QLabel):
     @icon.setter
     def icon(self, icon):
         """
-        Replace the old icon inside the label with new `icon`.
+        Replace the old icon inside the label with new `icon`,
+        which should be an instance of `QIcon()`.
         """
         width = height = self.icon_size
         pixmap = icon.pixmap(width, height)
