@@ -233,12 +233,18 @@ class CommandIconLabel(QtGui.QLabel):
             icon = QtGui.QIcon(path, parent=self)
         self.icon = icon
 
+    @property
+    def theme_name(self):
+        """
+        Return the theme name, which is used to retrieve an icon.
+        """
+        return settings.config['icon-theme'] or QtGui.QIcon.themeName()
+
     def set_icon_by_command(self, cmdline):
         """
         Show an icon corresponding to `cmdline`s first argument.
         """
-        theme = settings.config['icon-theme'] or QtGui.QIcon.themeName()
-        args = (cmdline, self.icon_size, theme)
+        args = (cmdline, self.icon_size, self.theme_name)
         icon_path = icongetter.get_iconpath_for_commandline(*args)
         self.update_icon(icon_path)
 
