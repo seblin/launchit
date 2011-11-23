@@ -242,7 +242,7 @@ class CommandIconLabel(QtGui.QLabel):
 
     def set_icon_by_command(self, cmdline):
         """
-        Show an icon corresponding to `cmdline`s first argument.
+        Let the label show an icon corresponding to `cmdline`s first argument.
         """
         args = (cmdline, self.icon_size, self.theme_name)
         icon_path = icongetter.get_iconpath_for_commandline(*args)
