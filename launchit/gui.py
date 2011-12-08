@@ -12,82 +12,74 @@ from PySide import QtCore, QtGui
 from . import core, icongetter, settings
 from ._stringutils import altstring, basestring
 
-class CompletionMarkupBuilder(object):
+class MarkedCompletionRenderer(QtGui.QTextDocument):
     """
-    This class is responsible for the markup, which is used to show
-    a completion item.
+    A rich text / HTML renderer that is specialized to create the markup 
+    used to show a completion item with a marked fragment. Its contents 
+    may be rendered by a painter.
     """
-    def __init__(self, start_mark='<b><u>', end_mark='</u></b>'):
+    def __init__(self, fragment='', start_mark='<b><u>', 
+                       end_mark='</u></b>', parent=None):
         """
-        The `start_mark` and `end_mark` tags are interpreted as rich text
-        in order to mark a fragment inside a completion. `start_mark` will
-        be placed before and `end_mark` will be placed after the fragment.
+        Given `start_mark` and `end_mark` are intended to be used as tags in
+        order to surround the current `fragment` inside a given completion. 
+        The resulting markup is then interpreted as rich text, when rendering 
+        is done. Note that the fragment does not need to be known on instance 
+        creation-time, since it may be set/changed later by just accessing the 
+        instance's `fragment`-attribute.
         """
+        QtGui.QTextDocument.__init__(self, parent)
+        self.fragment = fragment
         self.start_mark = start_mark
         self.end_mark = end_mark
 
-    def get_elided_markup(self, text, fragment, width):
+    def _get_markup(self, completion):
         """
-        Return `text` with each occurrence of `fragment` surrounded by
-        marking tags. Note that the result is truncated by an ellipsis, 
-        if it doesn't fit into `width`, when rendered. Though, in the 
-        end this function just returns the markup.
+        Return given `completion`-string, where each occurrence of the current 
+        fragment is surrounded by marking tags.
         """
-        # Note that truncation can't be made with QFontMetrics.elidedText()
-        # here, since that doesn't handle rich text. The trial and error
-        # approach has been chosen in order to avoid messing with the
-        # rendering engine. There probably should be no situation where
-        # memory consumption of this method is really getting noticeable.
-        markup = self.get_completion_markup(text, fragment)
-        temporary_renderer = QtGui.QTextDocument()
-        temporary_renderer.setHtml(markup)
-        rendered_width = temporary_renderer.idealWidth
-        ellipsis = '...'
-        while text and (rendered_width() > width):
-            text = text[:-1]
-            markup = self.get_completion_markup(text, fragment) + ellipsis
-            temporary_renderer.setHtml(markup)
-        return markup
-
-    def get_completion_markup(self, completion, fragment):
-        """
-        Place `self.start_mark` and `self.end_mark` around each occurrence 
-        of `fragment` inside `completion` and return the result.
-        """
-        return core.get_marked_completion(completion, fragment,
+        return core.get_marked_completion(completion, self.fragment,
                                           self.start_mark, self.end_mark)
+
+    def make_completion_markup(self, text, max_width=None):
+        """
+        Generate markup for given `text` and set the result onto the renderer.
+        If `max_width` is set to a pixel value and the rendered result would
+        become larger than that width, the result is truncated by an ellipsis. 
+        """
+        markup = self._get_markup(text)
+        self.setHtml(markup)
+        if max_width is not None:
+            # Note that truncation can't be made with QFontMetrics.elidedText()
+            # here, since that doesn't handle rich text. The trial and error
+            # approach has been chosen in order to avoid messing with the
+            # rendering engine. There probably should be no situation where
+            # memory consumption of this method is really getting noticeable.
+            rendered_width = self.idealWidth
+            while text and (rendered_width() > max_width):
+                text = text[:-1]
+                markup = self._get_markup(text) + '...'
+                self.setHtml(markup)
 
 class MarkedCompletionDelegate(QtGui.QItemDelegate):
     """
-    This class is intended to be used as an item delegate. It is able to 
-    render and draw a completion with a marked fragment.
+    An item delegate used to draw a completion with a marked fragment.
     """
-    def __init__(self, markup_builder=CompletionMarkupBuilder(), parent=None):
+    def __init__(self, renderer=None, parent=None):
         """
-        A new instance will have its `.fragment`-attribute, on which the
-        marking of a completion is based, initially set to an empty string. 
-        Whenever the fragment is needed to be changed (e.g. user has typed 
-        a new character to the commandline), the `.update_fragment()`-method 
-        may be used as a callback/slot in order to set the new fragment.
-
-        The `markup_builder` will be used to generate the corresponding
-        markup in order to render the completion entry. It is assumed to
-        provide an interface similar to `CompletionMarkupBuilder()` (at
-        least a `.get_elided_markup()`-method with the same signature).
+        Setup the delegate. `renderer` is expected to be a given as a
+        `MarkedCompletionRenderer()`-like instance. When `None` is used
+        instead, such renderer-instance is created automatically.
         """
         QtGui.QItemDelegate.__init__(self, parent)
-        self.markup_builder = markup_builder
-        self._renderer = QtGui.QTextDocument(parent=self)
-        self.fragment = ''
+        self.renderer = renderer or MarkedCompletionRenderer(parent=self)
 
     def update_fragment(self, fragment):
         """
-        Update the fragment, which is marked inside each completion, with
-        the given new `fragment`.
+        Update the fragment that is marked inside each completion with 
+        new `fragment`.
         """
-        if not isinstance(fragment, basestring):
-            raise TypeError('fragment must be a string')
-        self.fragment = fragment
+        self.renderer.fragment = fragment
 
     def paint(self, painter, option, index):
         """
@@ -100,27 +92,21 @@ class MarkedCompletionDelegate(QtGui.QItemDelegate):
 
     def draw_contents(self, painter, option, index):
         """
-        Let `self.markup_builder` generate the markup for the current 
-        completion (retrieved via `index.data()`) in order to make any 
-        occurrence of `self.fragment` appear inside marking tags. The
-        result is then rendered and painted. In case that the rendered
-        result is larger than the available width (which is taken from 
-        `option.rect`), it will be truncated by an ellipsis.
+        Let the renderer generate the markup for the current completion
+        string. That string is retrieved by a call to `index.data()`.
+        The result is then rendered and painted.
         """
-        markup = self.markup_builder.get_elided_markup(
-            index.data(), self.fragment, option.rect.width())
-        self.draw_markup(markup, painter, option.rect.topLeft())
+        self.renderer.make_completion_markup(index.data(), option.rect.width())
+        self.draw_markup(painter, option.rect.topLeft())
 
-    def draw_markup(self, markup, painter, start_pos):
+    def draw_markup(self, painter, start_pos):
         """
-        Render `markup`, which is assumed to be given in Qt's rich text 
-        format and draw it by using `painter`. Note that painting will 
-        be done relative to `start_pos`.
+        Draw the renderer's markup with `painter`. Note that painting 
+        is done relative to `start_pos`.
         """
-        self._renderer.setHtml(markup)
         painter.save()
         painter.translate(start_pos)
-        self._renderer.drawContents(painter)
+        self.renderer.drawContents(painter)
         painter.restore()
 
     def sizeHint(self, option, index):
@@ -130,7 +116,7 @@ class MarkedCompletionDelegate(QtGui.QItemDelegate):
         space it should provide for the item, when its painting is 
         requested.
         """
-        return self._renderer.size().toSize()
+        return self.renderer.size().toSize()
 
 class CommandlineCompleter(QtGui.QCompleter):
     """
