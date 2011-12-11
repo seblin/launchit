@@ -120,28 +120,39 @@ class MarkedCompletionDelegate(QtGui.QItemDelegate):
 
 class CommandlineCompleter(QtGui.QCompleter):
     """
-    This class provides and handles the popup, which shows the possible
-    completions for a given fragment. It is used by `LaunchEdit()`.
+    This class may be used to provide a popup in order to show possible
+    completions for a given fragment.
     """
     fragment_updated = QtCore.Signal([str], [altstring])
 
     def __init__(self, parent=None):
         """
-        Setup the completer. `MarkedCompletionDelegate()` is used to show 
-        an entry.
-
-        Note that a `fragment_updated`-signal is emitted, whenever the
-        underlying fragment for this completer has changed. This makes the
-        delegate, which is connected to that signal, able to change its
-        internal "marking state" needed to draw each completion correctly.
+        Setup the completer.
         """
         QtGui.QCompleter.__init__(self, parent)
         mode = self.UnfilteredPopupCompletion
         self.setCompletionMode(mode)
         model = QtGui.QStringListModel(parent=self)
         self.setModel(model)
-        delegate = MarkedCompletionDelegate(parent=self.popup())
-        self.fragment_updated.connect(delegate.update_fragment)
+
+    @property
+    def delegate(self):
+        """
+        Return the item delegate that is set on the completer's popup.
+        """
+        return self.popup().itemDelegate()
+
+    @delegate.setter
+    def delegate(self, delegate):
+        """
+        Set given item delegate on the completer's popup. If `delegate` 
+        has an `update_fragment`-method, it is connected to the completer's
+        `fragment_updated`-signal. Note that the popup will take ownership
+        of the delegate.
+        """
+        if hasattr(delegate, 'update_fragment'):
+            self.fragment_updated.connect(delegate.update_fragment)
+        delegate.setParent(self.popup())
         self.popup().setItemDelegate(delegate)
 
     def update(self, fragment):
@@ -167,6 +178,7 @@ class LaunchEdit(QtGui.QLineEdit):
         QtGui.QLineEdit.__init__(self, parent)
         completer = CommandlineCompleter(parent=self)
         self.textEdited.connect(completer.update)
+        completer.delegate = MarkedCompletionDelegate()
         self.setCompleter(completer)
         self.returnPressed.connect(self.launch)
 
