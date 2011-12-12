@@ -10,7 +10,7 @@ from PySide import QtCore, QtGui
 
 # Launchit package
 from . import core, icongetter, settings
-from ._stringutils import altstring, basestring
+from ._stringutils import altstring
 
 class MarkedCompletionRenderer(QtGui.QTextDocument):
     """
