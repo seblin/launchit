@@ -69,7 +69,7 @@ class MarkedCompletionDelegate(QtGui.QItemDelegate):
     def __init__(self, renderer=None, parent=None):
         """
         Setup the delegate. `renderer` is expected to be a given as a
-        `MarkedCompletionRenderer()`-like instance. When `None` is used
+        `MarkedCompletionRenderer`-like instance. When `None` is used
         instead, such renderer-instance is created automatically.
         """
         QtGui.QItemDelegate.__init__(self, parent)
@@ -128,8 +128,8 @@ class CommandlineCompleter(QtGui.QCompleter):
 
     def __init__(self, mark_fragment=True, parent=None):
         """
-        Setup the completer. If `mark_fragment` is `True`, completions
-        will appear with a marked fragment.
+        Setup the completer. If `mark_fragment` is `True`, each completion
+        will appear with a marked fragment (using `MarkedCompletionDelegate`).
         """
         QtGui.QCompleter.__init__(self, parent)
         mode = self.UnfilteredPopupCompletion
