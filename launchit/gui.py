@@ -55,10 +55,11 @@ class MarkedCompletionRenderer(QtGui.QTextDocument):
             # approach has been chosen in order to avoid messing with the
             # rendering engine. There probably should be no situation where
             # memory consumption of this method is really getting noticeable.
+            ellipsis = '...'
             rendered_width = self.idealWidth
             while text and (rendered_width() > max_width):
                 text = text[:-1]
-                markup = self._get_markup(text) + '...'
+                markup = self._get_markup(text) + ellipsis
                 self.setHtml(markup)
 
 class MarkedCompletionDelegate(QtGui.QItemDelegate):
