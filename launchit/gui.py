@@ -126,16 +126,25 @@ class CommandlineCompleter(QtGui.QCompleter):
     """
     fragment_updated = QtCore.Signal([str], [altstring])
 
-    def __init__(self, mark_fragment=True, parent=None):
+    def __init__(self, completiongetter, mark_fragment=True, parent=None):
         """
-        Setup the completer. If `mark_fragment` is `True`, each completion
-        will appear with a marked fragment (using `MarkedCompletionDelegate`).
+        Setup the completer. 
+
+        `completiongetter` should be a callable that takes a string as an 
+        argument for a given fragment. Its return value should be a list 
+        of possible completions based on that fragment.
+
+        `mark_fragment` is used to determine, whether the current fragment 
+        should appear as marked inside each completion item. When this is 
+        `True`, the item delegate of the completer's popup is replaced with 
+        `MarkedCompletionDelegate`.
         """
         QtGui.QCompleter.__init__(self, parent)
         mode = self.UnfilteredPopupCompletion
         self.setCompletionMode(mode)
         model = QtGui.QStringListModel(parent=self)
         self.setModel(model)
+        self.completiongetter = completiongetter
         if mark_fragment:
             self.delegate = MarkedCompletionDelegate()
 
@@ -165,7 +174,7 @@ class CommandlineCompleter(QtGui.QCompleter):
         emit a `fragment_updated`-signal, using the new fragment as the 
         signal's argument.
         """
-        completions = core.get_name_completions(fragment)
+        completions = self.completiongetter(fragment)
         self.model().setStringList(completions)
         self.fragment_updated.emit(fragment)
 
@@ -180,7 +189,8 @@ class LaunchEdit(QtGui.QLineEdit):
         will invoke the command.
         """
         QtGui.QLineEdit.__init__(self, parent)
-        completer = CommandlineCompleter(parent=self)
+        completer = CommandlineCompleter(
+            core.get_name_completions, parent=self)
         self.textEdited.connect(completer.update)
         self.setCompleter(completer)
         self.returnPressed.connect(self.launch)
