@@ -125,15 +125,18 @@ class CommandlineCompleter(QtGui.QCompleter):
     """
     fragment_updated = QtCore.Signal([str], [altstring])
 
-    def __init__(self, parent=None):
+    def __init__(self, mark_fragment=True, parent=None):
         """
-        Setup the completer.
+        Setup the completer. If `mark_fragment` is `True`, completions
+        will appear with a marked fragment.
         """
         QtGui.QCompleter.__init__(self, parent)
         mode = self.UnfilteredPopupCompletion
         self.setCompletionMode(mode)
         model = QtGui.QStringListModel(parent=self)
         self.setModel(model)
+        if mark_fragment:
+            self.delegate = MarkedCompletionDelegate()
 
     @property
     def delegate(self):
@@ -178,7 +181,6 @@ class LaunchEdit(QtGui.QLineEdit):
         QtGui.QLineEdit.__init__(self, parent)
         completer = CommandlineCompleter(parent=self)
         self.textEdited.connect(completer.update)
-        completer.delegate = MarkedCompletionDelegate()
         self.setCompleter(completer)
         self.returnPressed.connect(self.launch)
 
