@@ -182,24 +182,29 @@ class LaunchEdit(QtGui.QLineEdit):
     """
     An editable text field, into which the user may type a command.
     """
-    def __init__(self, parent=None):
+    def __init__(self, launcher=None, parent=None):
         """
-        Setup the text field. Possible completions will appear as 
-        soon as the user starts typing. Pressing the return key 
-        will invoke the command.
+        Setup the text field. Possible completions will appear as soon as 
+        the user starts typing. Pressing the return key will invoke the 
+        command.
+
+        Note that `launcher` is expected to be a callable that takes the 
+        command to launch as a string. The way how the given command will 
+        be invoked is up to that callable.
         """
         QtGui.QLineEdit.__init__(self, parent)
         completer = CommandlineCompleter(
             core.get_name_completions, parent=self)
         self.textEdited.connect(completer.update)
         self.setCompleter(completer)
+        self.launcher = launcher
         self.returnPressed.connect(self.launch)
 
     def launch(self):
         """
         Launch the contents of the text field.
         """
-        core.launch(self.text())
+        self.launcher(self.text())
 
 class CommandIconLabel(QtGui.QLabel):
     """
@@ -274,7 +279,7 @@ class LaunchWidget(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         self.icon_label = CommandIconLabel(parent=self)
         update_icon = self.icon_label.set_icon_by_command
-        self.edit = LaunchEdit(parent=self)
+        self.edit = LaunchEdit(core.launch, parent=self)
         self.edit.textChanged.connect(update_icon)
         self._make_layout([self.icon_label, self.edit])
         update_icon(self.edit.text())
