@@ -210,13 +210,13 @@ class CommandIconLabel(QtGui.QLabel):
     """
     A label, which holds an icon to represent a command.
     """
-    def __init__(self, icon_size=32, parent=None):
+    def __init__(self, max_icon_size=32, parent=None):
         """
-        Takes `icon_size`, which should be an integer to define the
+        Takes `max_icon_size`, which should be an integer to define the
         maximal size of an icon inside the label.
         """
         QtGui.QLabel.__init__(self, parent)
-        self.icon_size = icon_size
+        self.max_icon_size = max_icon_size
         self._icon = QtGui.QIcon(parent=self)
 
     @property
@@ -232,8 +232,8 @@ class CommandIconLabel(QtGui.QLabel):
         Replace the old icon inside the label with new `icon`,
         which should be an instance of `QIcon()`.
         """
-        width = height = self.icon_size
-        pixmap = icon.pixmap(width, height)
+        max_width = max_height = self.max_icon_size
+        pixmap = icon.pixmap(max_width, max_height)
         self.setPixmap(pixmap)
         self._icon = icon
 
@@ -260,7 +260,7 @@ class CommandIconLabel(QtGui.QLabel):
         """
         Let the label show an icon corresponding to `cmdline`s first argument.
         """
-        args = (cmdline, self.icon_size, self.theme_name)
+        args = (cmdline, self.max_icon_size, self.theme_name)
         icon_path = icongetter.get_iconpath_for_commandline(*args)
         self.update_icon(icon_path)
 
