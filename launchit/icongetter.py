@@ -24,37 +24,6 @@ ICON_RUN = 'system-run'
 ICON_EXECUTABLE = 'application-x-executable'
 
 @keep_string_type
-def get_iconpath_for_commandline(cmdline, size, theme):
-    """
-    High-level function, which takes and parses the given `cmdline`.
-    Then `cmdline`s first argument is used to guess a suitable icon
-    name. Finally a full icon path for that name is returned with 
-    respect to the desired `size` and `theme`. Note that `None` may 
-    be returned if no icon path could be obtained.
-    """
-    args = parse_commandline(cmdline)
-    icon_name = guess_icon_name(args[0] if args else '')
-    return get_iconpath(icon_name, size, theme)
-
-@keep_string_type
-def guess_icon_name(path, fallback=ICON_RUN):
-    """
-    Return a suitable icon name for the given `path`. If `path` is a 
-    command, which appears in one of the user's menu entries, then 
-    return the entry's icon name. Otherwise return a generic icon name 
-    depending on the filetype of `path`. In case that no association 
-    could be made, `fallback` will be returned instead.
-    """
-    starter_icon = get_starter_icon(path)
-    if starter_icon:
-        name = starter_icon
-    elif is_command(path) or is_executable_file(path):
-        name = ICON_EXECUTABLE
-    else:
-        name = fallback
-    return name
-
-@keep_string_type
 def get_iconpath(icon_name, size, theme):
     """
     Return a path, which refers to an icon file with the given name 
@@ -72,18 +41,37 @@ def get_iconpath(icon_name, size, theme):
         return None
     return path
 
-def is_iconfile(path):
+@keep_string_type
+def guess_icon_name(command, split_args=True, fallback=ICON_RUN):
     """
-    Return `True` if `path` refers to an existing file with one of the 
-    file extensions defined by `ICONFILE_EXTENSIONS`, otherwise `False`.
-    """
-    extension = os.path.splitext(path)[1].lstrip(os.extsep)
-    return os.path.isfile(path) and extension in ICONFILE_EXTENSIONS
+    Return a suitable icon name for the given `command`. 
 
-icon_cache = {}
+    If the command appears in one of the user's menu entries, then 
+    return the icon name for that entry. Otherwise return a generic 
+    icon name depending on the filetype of `command`. In case that 
+    no association could be made, `fallback` will be returned instead.
+
+    If `split_args` is `True`, then any whitespace inside `command` 
+    is stripped out, since it is interpreted as the delimiter in order 
+    to do shell-like parsing of `command` into arguments. The resulting
+    first argument is then used to guess an icon for it. In case that
+    `command` results in no arguments (i.e. it was given as a string of
+    pure whitespace characters), `fallback` will be returned for it.
+    """
+    if not command:
+        return fallback
+    if split_args:
+        args = parse_commandline(command)
+        if not args:
+            return fallback
+        else:
+            command = args[0]
+    return (guess_starter_icon(command) or
+            guess_filetype_icon(command) or
+            fallback)
 
 @keep_string_type
-def get_starter_icon(command, use_cache=True):
+def guess_starter_icon(command, use_cache=True):
     """
     Return the associated icon for a given command. This is done by 
     analyzing the starter entries of the user's menu files: If the 
@@ -114,6 +102,31 @@ def get_starter_icon(command, use_cache=True):
     except KeyError:
         return None
     return icon
+
+@keep_string_type
+def guess_filetype_icon(filename):
+    """
+    Return icon for given `filename` depending on its filetype. 
+    Return `None` if no association could be made.
+    """
+    # TODO: Implement lots of more checks
+    if is_command(filename) or is_executable_file(filename):
+        name = ICON_EXECUTABLE
+    else:
+        name = None
+    return name
+
+def is_iconfile(path):
+    """
+    Return `True` if `path` refers to an existing file with one of the 
+    file extensions defined by `ICONFILE_EXTENSIONS`, otherwise `False`.
+    """
+    extension = os.path.splitext(path)[1].lstrip(os.extsep)
+    return os.path.isfile(path) and extension in ICONFILE_EXTENSIONS
+
+# Low-level stuff
+
+icon_cache = {}
 
 def init_icon_cache():
     """
