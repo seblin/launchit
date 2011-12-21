@@ -16,30 +16,28 @@ from ._stringutils import convert, keep_string_type
 from .core import (
     get_trimmed, is_command, is_executable_file, parse_commandline)
 
-# File extensions as defined by XDG icon-theme spec
-ICONFILE_EXTENSIONS = ['png', 'svg', 'xpm']
-
 # Icon name constants (following XDG icon spec)
 ICON_RUN = 'system-run'
 ICON_EXECUTABLE = 'application-x-executable'
 
 @keep_string_type
-def get_iconpath(icon_name, size, theme):
+def get_icon_path(icon_name, size=48, theme=None):
     """
     Return a path, which refers to an icon file with the given name 
     regarding to given `size` and `theme`. Return `None` if no icon
     path could be obtained.
 
-    Note that `icon_name` may also be given as an absolute path name. 
-    It is then returned unchanged, if it is recognized as an icon file, 
-    ignoring the values for `size` and `theme`. If the path refers to
-    something else or if it does not exist, `None` will be returned.
+    Note that `theme` may be set to `None`. It is then retrieved via 
+    launchit's internal config dict (`settings.config['theme-name']`).
     """
-    path = xdg.IconTheme.getIconPath(
-        icon_name, size, theme, ICONFILE_EXTENSIONS)
-    if path is None or not is_iconfile(path):
+    if os.path.isabs(icon_name):
+        # Work around strange PyXDG behaviour, 
+        # which would return an absolute path
+        # unchanged (for whatever reason)
         return None
-    return path
+    if theme is None:
+        theme = settings.config['icon-theme']
+    return xdg.IconTheme.getIconPath(icon_name, size, theme)
 
 @keep_string_type
 def guess_icon_name(command, split_args=True, fallback=ICON_RUN):
@@ -115,14 +113,6 @@ def guess_filetype_icon(filename):
     else:
         name = None
     return name
-
-def is_iconfile(path):
-    """
-    Return `True` if `path` refers to an existing file with one of the 
-    file extensions defined by `ICONFILE_EXTENSIONS`, otherwise `False`.
-    """
-    extension = os.path.splitext(path)[1].lstrip(os.extsep)
-    return os.path.isfile(path) and extension in ICONFILE_EXTENSIONS
 
 # Low-level stuff
 

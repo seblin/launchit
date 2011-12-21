@@ -11,7 +11,7 @@ from . import logger
 # Default configuration
 config = {
     'encoding': 'utf-8',
-    'icon-theme': None,
+    'icon-theme': 'hicolor',
     'menu-dir': '/etc/xdg/menus',
     'starter' : 'xdg-open',
 }
