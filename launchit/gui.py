@@ -2,6 +2,9 @@
 """
 Graphical user-interface made with PySide.
 """
+# Note: To avoid confusion, this file follows Qt's naming conventions.
+# Anything else should remain in PEP8-compliant style.
+
 # Stdlib
 import sys
 
@@ -18,10 +21,10 @@ class MarkedCompletionRenderer(QtGui.QTextDocument):
     used to show a completion item with a marked fragment. Its contents 
     may be rendered by a painter.
     """
-    def __init__(self, fragment='', start_mark='<b><u>', 
-                       end_mark='</u></b>', parent=None):
+    def __init__(self, fragment='', startMark='<b><u>', 
+                       endMark='</u></b>', parent=None):
         """
-        Given `start_mark` and `end_mark` are intended to be used as tags in
+        Given `startMark` and `endMark` are intended to be used as tags in
         order to surround the current `fragment` inside a given completion. 
         The resulting markup is then interpreted as rich text, when rendering 
         is done. Note that the fragment does not need to be known on instance 
@@ -30,36 +33,36 @@ class MarkedCompletionRenderer(QtGui.QTextDocument):
         """
         QtGui.QTextDocument.__init__(self, parent)
         self.fragment = fragment
-        self.start_mark = start_mark
-        self.end_mark = end_mark
+        self.startMark = startMark
+        self.endMark = endMark
 
-    def _get_markup(self, completion):
+    def _getMarkup(self, completion):
         """
         Return given `completion`-string, where each occurrence of the current 
         fragment is surrounded by marking tags.
         """
         return core.get_marked_completion(completion, self.fragment,
-                                          self.start_mark, self.end_mark)
+                                          self.startMark, self.endMark)
 
-    def make_completion_markup(self, text, max_width=None):
+    def makeCompletionMarkup(self, text, maxWidth=None):
         """
         Generate markup for given `text` and set the result onto the renderer.
-        If `max_width` is set to a pixel value and the rendered result would
+        If `maxWidth` is set to a pixel value and the rendered result would
         become larger than that width, the result is truncated by an ellipsis. 
         """
-        markup = self._get_markup(text)
+        markup = self._getMarkup(text)
         self.setHtml(markup)
-        if max_width is not None:
+        if maxWidth is not None:
             # Note that truncation can't be made with QFontMetrics.elidedText()
             # here, since that doesn't handle rich text. The trial and error
             # approach has been chosen in order to avoid messing with the
             # rendering engine. There probably should be no situation where
             # memory consumption of this method is really getting noticeable.
             ellipsis = '...'
-            rendered_width = self.idealWidth
-            while text and (rendered_width() > max_width):
+            renderedWidth = self.idealWidth
+            while text and (renderedWidth() > maxWidth):
                 text = text[:-1]
-                markup = self._get_markup(text) + ellipsis
+                markup = self._getMarkup(text) + ellipsis
                 self.setHtml(markup)
 
 class MarkedCompletionDelegate(QtGui.QItemDelegate):
@@ -75,7 +78,7 @@ class MarkedCompletionDelegate(QtGui.QItemDelegate):
         QtGui.QItemDelegate.__init__(self, parent)
         self.renderer = renderer or MarkedCompletionRenderer(parent=self)
 
-    def update_fragment(self, fragment):
+    def updateFragment(self, fragment):
         """
         Update the fragment that is marked inside each completion with 
         new `fragment`.
@@ -89,24 +92,24 @@ class MarkedCompletionDelegate(QtGui.QItemDelegate):
         to call this method directly, since Qt already does this for us.
         """
         self.drawBackground(painter, option, index)
-        self.draw_contents(painter, option, index)
+        self.drawContents(painter, option, index)
 
-    def draw_contents(self, painter, option, index):
+    def drawContents(self, painter, option, index):
         """
         Let the renderer generate the markup for the current completion
         string. That string is retrieved by a call to `index.data()`.
         The result is then rendered and painted.
         """
-        self.renderer.make_completion_markup(index.data(), option.rect.width())
-        self.draw_markup(painter, option.rect.topLeft())
+        self.renderer.makeCompletionMarkup(index.data(), option.rect.width())
+        self.drawMarkup(painter, option.rect.topLeft())
 
-    def draw_markup(self, painter, start_pos):
+    def drawMarkup(self, painter, startPos):
         """
         Draw the renderer's markup with `painter`. Note that painting 
-        is done relative to `start_pos`.
+        is done relative to `startPos`.
         """
         painter.save()
-        painter.translate(start_pos)
+        painter.translate(startPos)
         self.renderer.drawContents(painter)
         painter.restore()
 
@@ -124,9 +127,9 @@ class CommandlineCompleter(QtGui.QCompleter):
     This class may be used to provide a popup in order to show possible
     completions for a given fragment.
     """
-    fragment_updated = QtCore.Signal([str], [altstring])
+    fragmentUpdated = QtCore.Signal([str], [altstring])
 
-    def __init__(self, completiongetter, mark_fragment=True, parent=None):
+    def __init__(self, completiongetter, markFragment=True, parent=None):
         """
         Setup the completer. 
 
@@ -134,7 +137,7 @@ class CommandlineCompleter(QtGui.QCompleter):
         argument for a given fragment. Its return value should be a list 
         of possible completions based on that fragment.
 
-        `mark_fragment` is used to determine, whether the current fragment 
+        `markFragment` is used to determine, whether the current fragment 
         should appear as marked inside each completion item. When this is 
         `True`, the item delegate of the completer's popup is replaced with 
         `MarkedCompletionDelegate`.
@@ -145,7 +148,7 @@ class CommandlineCompleter(QtGui.QCompleter):
         model = QtGui.QStringListModel(parent=self)
         self.setModel(model)
         self.completiongetter = completiongetter
-        if mark_fragment:
+        if markFragment:
             self.delegate = MarkedCompletionDelegate()
 
     @property
@@ -159,24 +162,24 @@ class CommandlineCompleter(QtGui.QCompleter):
     def delegate(self, delegate):
         """
         Set given item delegate on the completer's popup. If `delegate` 
-        has an `update_fragment`-method, it is connected to the completer's
-        `fragment_updated`-signal. Note that the popup will take ownership
+        has an `updateFragment`-method, it is connected to the completer's
+        `fragmentUpdated`-signal. Note that the popup will take ownership
         of the delegate.
         """
-        if hasattr(delegate, 'update_fragment'):
-            self.fragment_updated.connect(delegate.update_fragment)
+        if hasattr(delegate, 'updateFragment'):
+            self.fragmentUpdated.connect(delegate.updateFragment)
         delegate.setParent(self.popup())
         self.popup().setItemDelegate(delegate)
 
     def update(self, fragment):
         """
         Update the list of possible completions based on `fragment` and 
-        emit a `fragment_updated`-signal, using the new fragment as the 
+        emit a `fragmentUpdated`-signal, using the new fragment as the 
         signal's argument.
         """
         completions = self.completiongetter(fragment)
         self.model().setStringList(completions)
-        self.fragment_updated.emit(fragment)
+        self.fragmentUpdated.emit(fragment)
 
 class LaunchEdit(QtGui.QLineEdit):
     """
@@ -211,13 +214,13 @@ class Icon(QtGui.QIcon):
     A class to represent an icon.
     """
     @classmethod
-    def from_command(cls, command):
+    def fromCommand(cls, command):
         """
         Return a new instance of this class holding an appropriated 
         icon for the given `command`.
         """
-        icon_name = icongetter.guess_icon_name(command)
-        return cls.fromTheme(icon_name)
+        iconName = icongetter.guess_icon_name(command)
+        return cls.fromTheme(iconName)
 
     @classmethod
     def fromTheme(cls, name, fallback=QtGui.QIcon()):
@@ -226,26 +229,26 @@ class Icon(QtGui.QIcon):
         and return it in a new instance of this class. If no suitable 
         icon was found, then the instance is based on `fallback`.
         """
-        icon_path = icongetter.get_icon_path(name)
-        return cls(icon_path or fallback)
+        iconPath = icongetter.get_icon_path(name)
+        return cls(iconPath or fallback)
 
 class CommandIconLabel(QtGui.QLabel):
     """
     A label, which holds an icon to represent a command.
     """
-    def __init__(self, icon_name=None, max_icon_size=32, parent=None):
+    def __init__(self, iconName=None, maxIconSize=32, parent=None):
         """
         Setup the icon label.
 
-        If `icon_name` is not given, then `icongetter.ICON_RUN` is 
+        If `iconName` is not given, then `icongetter.ICON_RUN` is 
         used instead.
 
-        `max_icon_size` may be used to define the maximal size of 
+        `maxIconSize` may be used to define the maximal size of 
         the icon inside the label.
         """
         QtGui.QLabel.__init__(self, parent)
-        self.max_icon_size = max_icon_size
-        self.icon = Icon.fromTheme(icon_name or icongetter.ICON_RUN)
+        self.maxIconSize = maxIconSize
+        self.icon = Icon.fromTheme(iconName or icongetter.ICON_RUN)
 
     @property
     def icon(self):
@@ -260,8 +263,8 @@ class CommandIconLabel(QtGui.QLabel):
         Replace the old icon inside the label with new `icon`,
         which should a `QIcon`- or `Icon`-like instance.
         """
-        max_width = max_height = self.max_icon_size
-        pixmap = icon.pixmap(max_width, max_height)
+        maxWidth = maxHeight = self.maxIconSize
+        pixmap = icon.pixmap(maxWidth, maxHeight)
         self.setPixmap(pixmap)
         self._icon = icon
 
@@ -271,7 +274,7 @@ class CommandIconLabel(QtGui.QLabel):
         If the command consists of multiple arguments, only its 
         first argument is used for determination.
         """
-        self.icon = Icon.from_command(command)
+        self.icon = Icon.fromCommand(command)
 
 class LaunchWidget(QtGui.QWidget):
     """
@@ -286,25 +289,25 @@ class LaunchWidget(QtGui.QWidget):
         appropriated icon is shown.
         """
         QtGui.QWidget.__init__(self, parent)
-        self.icon_label = CommandIconLabel(parent=self)
+        self.iconLabel = CommandIconLabel(parent=self)
         self.edit = LaunchEdit(core.launch, parent=self)
-        self.edit.textChanged.connect(self.icon_label.update)
-        self._make_layout([self.icon_label, self.edit])
+        self.edit.textChanged.connect(self.iconLabel.update)
+        self._makeLayout([self.iconLabel, self.edit])
 
-    def _make_layout(self, widgets):
+    def _makeLayout(self, widgets):
         """
         Create a horizontal layout and fill it with `widgets` with respect 
         to the order in which the widgets are given. Finally set the layout 
-        to the `LaunchWidget()`.
+        to the `LaunchWidget`.
         """
         layout = QtGui.QHBoxLayout(self)
         for widget in widgets:
             layout.addWidget(widget)
         self.setLayout(layout)
 
-def run_app(args=[], title='Launchit'):
+def runApp(args=[], title='Launchit'):
     """
-    Run the application based on `args`. The `LaunchWidget()` will appear 
+    Run the application based on `args`. The `LaunchWidget` will appear 
     inside a window. That window will make use of `title` as the caption 
     for its title bar. The applications's exit code will be returned after 
     execution.
@@ -322,7 +325,7 @@ def main():
     the commandline's arguments. When the GUI was exited, it will also exit
     the interpreter using the application's return value as the exit code. 
     """
-    sys.exit(run_app(sys.argv))
+    sys.exit(runApp(sys.argv))
 
 if __name__ == '__main__':
     main()
