@@ -240,11 +240,12 @@ class CommandIconLabel(QtGui.QLabel):
         """
         Setup the icon label.
 
-        If `iconName` is not given, then `icongetter.ICON_RUN` is 
-        used instead.
+        On startup an icon with the given `iconName` is retrieved from 
+        the current icon theme and initially set to the label. If that 
+        name is `None`, then `icongetter.ICON_RUN` is used instead.
 
-        `maxIconSize` may be used to define the maximal size of 
-        the icon inside the label.
+        `maxIconSize` is used to define the maximal size that an icon 
+        may have.
         """
         QtGui.QLabel.__init__(self, parent)
         self.maxIconSize = maxIconSize
