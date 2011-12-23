@@ -206,18 +206,46 @@ class LaunchEdit(QtGui.QLineEdit):
         """
         self.launcher(self.text())
 
+class Icon(QtGui.QIcon):
+    """
+    A class to represent an icon.
+    """
+    @classmethod
+    def from_command(cls, command):
+        """
+        Return a new instance of this class holding an appropriated 
+        icon for the given `command`.
+        """
+        icon_name = icongetter.guess_icon_name(command)
+        return cls.fromTheme(icon_name)
+
+    @classmethod
+    def fromTheme(cls, name, fallback=QtGui.QIcon()):
+        """
+        Look for icon with given `name` in the current icon theme 
+        and return it in a new instance of this class. If no suitable 
+        icon was found, then the instance is based on `fallback`.
+        """
+        icon_path = icongetter.get_icon_path(name)
+        return cls(icon_path or fallback)
+
 class CommandIconLabel(QtGui.QLabel):
     """
     A label, which holds an icon to represent a command.
     """
-    def __init__(self, max_icon_size=32, parent=None):
+    def __init__(self, icon_name=None, max_icon_size=32, parent=None):
         """
-        Takes `max_icon_size`, which should be an integer to define the
-        maximal size of an icon inside the label.
+        Setup the icon label.
+
+        If `icon_name` is not given, then `icongetter.ICON_RUN` is 
+        used instead.
+
+        `max_icon_size` may be used to define the maximal size of 
+        the icon inside the label.
         """
         QtGui.QLabel.__init__(self, parent)
         self.max_icon_size = max_icon_size
-        self._icon = QtGui.QIcon(parent=self)
+        self.icon = Icon.fromTheme(icon_name or icongetter.ICON_RUN)
 
     @property
     def icon(self):
@@ -230,40 +258,20 @@ class CommandIconLabel(QtGui.QLabel):
     def icon(self, icon):
         """
         Replace the old icon inside the label with new `icon`,
-        which should be an instance of `QIcon()`.
+        which should a `QIcon`- or `Icon`-like instance.
         """
         max_width = max_height = self.max_icon_size
         pixmap = icon.pixmap(max_width, max_height)
         self.setPixmap(pixmap)
         self._icon = icon
 
-    def update_icon(self, path):
+    def update(self, command):
         """
-        Update the icon inside the label based on `path`. Note that
-        `path` should refer to an existing icon file. If it is `None`,
-        then an empty icon is set on the label.
+        Update the icon inside the label based on given `command`. 
+        If the command consists of multiple arguments, only its 
+        first argument is used for determination.
         """
-        if path is None:
-            icon = QtGui.QIcon(parent=self)
-        else:
-            icon = QtGui.QIcon(path, parent=self)
-        self.icon = icon
-
-    @property
-    def theme_name(self):
-        """
-        Return the theme name, which is used to retrieve an icon.
-        """
-        return settings.config['icon-theme'] or QtGui.QIcon.themeName()
-
-    def set_icon_by_command(self, cmdline):
-        """
-        Let the label show an icon corresponding to `cmdline`s first argument.
-        """
-        icon_name = icongetter.guess_icon_name(cmdline)
-        icon_path = icongetter.get_icon_path(
-            icon_name, self.max_icon_size, self.theme_name)
-        self.update_icon(icon_path)
+        self.icon = Icon.from_command(command)
 
 class LaunchWidget(QtGui.QWidget):
     """
@@ -279,11 +287,9 @@ class LaunchWidget(QtGui.QWidget):
         """
         QtGui.QWidget.__init__(self, parent)
         self.icon_label = CommandIconLabel(parent=self)
-        update_icon = self.icon_label.set_icon_by_command
         self.edit = LaunchEdit(core.launch, parent=self)
-        self.edit.textChanged.connect(update_icon)
+        self.edit.textChanged.connect(self.icon_label.update)
         self._make_layout([self.icon_label, self.edit])
-        update_icon(self.edit.text())
 
     def _make_layout(self, widgets):
         """
