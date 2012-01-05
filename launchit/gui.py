@@ -88,8 +88,8 @@ class MarkedCompletionDelegate(QtGui.QItemDelegate):
     def drawDisplay(self, painter, option, rect, text):
         """
         Reimplemented method to draw the contents of a completion item.
-        You should not need to call that directly, since Qt is invoking
-        that internally during a paint request.
+        You should not need to call that method directly, since Qt is 
+        already doing this on every paint request.
         """
         self.renderer.makeCompletionMarkup(text, rect.width())
         self.drawMarkup(painter, rect.topLeft())
