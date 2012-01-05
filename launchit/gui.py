@@ -85,23 +85,14 @@ class MarkedCompletionDelegate(QtGui.QItemDelegate):
         """
         self.renderer.fragment = fragment
 
-    def paint(self, painter, option, index):
+    def drawDisplay(self, painter, option, rect, text):
         """
-        Reimplemented method to draw a completion entry. This makes use
-        of Qt's model/view framework. Note that there usually is no need 
-        to call this method directly, since Qt already does this for us.
+        Reimplemented method to draw the contents of a completion item.
+        You should not need to call that directly, since Qt is invoking
+        that internally during a paint request.
         """
-        self.drawBackground(painter, option, index)
-        self.drawContents(painter, option, index)
-
-    def drawContents(self, painter, option, index):
-        """
-        Let the renderer generate the markup for the current completion
-        string. That string is retrieved by a call to `index.data()`.
-        The result is then rendered and painted.
-        """
-        self.renderer.makeCompletionMarkup(index.data(), option.rect.width())
-        self.drawMarkup(painter, option.rect.topLeft())
+        self.renderer.makeCompletionMarkup(text, rect.width())
+        self.drawMarkup(painter, rect.topLeft())
 
     def drawMarkup(self, painter, startPos):
         """
