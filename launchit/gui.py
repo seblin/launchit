@@ -2,8 +2,8 @@
 """
 Graphical user-interface made with PySide.
 """
-# Note: To avoid confusion, this file follows Qt's naming conventions.
-# Anything else should remain in PEP8-compliant style.
+# NOTE: This file exceptionally follows Qt's naming conventions instead of
+#       PEP-8 in order to avoid a mixing of those two naming schemes.
 
 # Stdlib
 import sys
