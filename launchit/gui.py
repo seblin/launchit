@@ -65,7 +65,7 @@ class MarkedCompletionRenderer(QtGui.QTextDocument):
                 markup = self._getMarkup(text) + ellipsis
                 self.setHtml(markup)
 
-class MarkedCompletionDelegate(QtGui.QItemDelegate):
+class MarkedCompletionDelegate(QtGui.QStyledItemDelegate):
     """
     An item delegate used to draw a completion with a marked fragment.
     """
@@ -75,7 +75,7 @@ class MarkedCompletionDelegate(QtGui.QItemDelegate):
         `MarkedCompletionRenderer`-like instance. When `None` is used
         instead, such renderer-instance is created automatically.
         """
-        QtGui.QItemDelegate.__init__(self, parent)
+        QtGui.QStyledItemDelegate.__init__(self, parent)
         self.renderer = renderer or MarkedCompletionRenderer(parent=self)
 
     def updateFragment(self, fragment):
@@ -85,14 +85,71 @@ class MarkedCompletionDelegate(QtGui.QItemDelegate):
         """
         self.renderer.fragment = fragment
 
-    def drawDisplay(self, painter, option, rect, text):
+    def paint(self, painter, option, index):
         """
-        Reimplemented method to draw the contents of a completion item.
-        You should not need to call that method directly, since Qt is 
-        already doing this on every paint request.
+        Render a marked completion item using the given `painter`. 
+
+        Initially, the "framing" is done by painting the item without
+        any contents. Therefore, `option` is used to determine the
+        desired style for the item. `option` is expected to be given
+        as a `QStyleOptionViewItem`-instance.
+
+        After that, the contents to fill the item are retrieved from
+        the given `index`, passed to the delegate's renderer in order
+        mark the completion's fragment and finally drawn inside the 
+        "empty" item.
+
+        Note that this reimplemented method is usually invoked by Qt
+        on its own. Users normally do not need to call it explicitly.
         """
-        self.renderer.makeCompletionMarkup(text, rect.width())
-        self.drawMarkup(painter, rect.topLeft())
+        self.drawItem(painter, option) # => empty item
+        indexOption = self.getOptionForIndex(option, index)
+        self.drawMarkedContents(painter, indexOption)
+
+    def drawItem(self, painter, option):
+        """
+        Draw an item for the view using `painter` based on the values of
+        given `option`. If `option` supports a `widget`-member, then that
+        widget's style is used, otherwise the application's style is used.
+        Note that this method is not able to interpret fomatting tags.
+        """
+        widget = getattr(option, 'widget', None)
+        style = widget.style() if widget else QtGui.QApplication.style()
+        style.drawControl(style.CE_ItemViewItem, option, painter, widget)
+
+    def getOptionForIndex(self, option, index):
+        """
+        Use a new `QStyleOptionViewItemV4`-instance for given `option`,
+        fill in the values for each role based on `index` and return it.
+        """
+        new_option = QtGui.QStyleOptionViewItemV4(option)
+        self.initStyleOption(new_option, index)
+        return new_option
+
+    def drawMarkedContents(self, painter, option):
+        """
+        Draw the completion item's text using `painter`. Each occurrence of
+        the current fragment will appear as marked. `option` is expected to 
+        include the same information (especially about positioning) that has
+        already been used to draw the item's framing.
+        """
+        # Note that this is more or less a hack in order to override Qt's
+        # usual text rendering behavior, which seems not to be able to 
+        # interpret rich text formatting tags in a view. For that part, a 
+        # customized renderer must take the job. Unfortunately, it does not 
+        # cover every detail of Qt's text attribute handling (e.g. direction 
+        # or alignment). Therefore, it may come to somewhat odd  behavior in 
+        # special cases.
+        self.setupMarkup(option.text, option.rect.width())
+        self.drawMarkup(painter, option.rect.topLeft())
+
+    def setupMarkup(self, text, maxWidth=None):
+        """
+        Set appropriated markup for given completion `text` onto the renderer. 
+        Note that `maxWidth` can be used (with a pixel value) to let the text
+        be truncated if it doesn't fit into the item.
+        """
+        self.renderer.makeCompletionMarkup(text, maxWidth)
 
     def drawMarkup(self, painter, startPos):
         """
