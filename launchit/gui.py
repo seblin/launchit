@@ -277,14 +277,15 @@ class Icon(QtGui.QIcon):
         and return it in a new instance of this class. If no suitable 
         icon was found, then the instance is based on `fallback`.
         """
-        iconPath = icongetter.get_icon_path(name)
+        iconPath = icongetter.get_icon_path(name, theme=cls.themeName())
         return cls(iconPath or fallback)
 
 class CommandIconLabel(QtGui.QLabel):
     """
     A label, which holds an icon to represent a command.
     """
-    def __init__(self, iconName=None, maxIconSize=32, parent=None):
+    def __init__(self, iconName=None, maxIconSize=32, 
+                       iconTheme=None, parent=None):
         """
         Setup the icon label.
 
@@ -292,11 +293,18 @@ class CommandIconLabel(QtGui.QLabel):
         the current icon theme and initially set to the label. If that 
         name is `None`, then `icongetter.ICON_RUN` is used instead.
 
-        `maxIconSize` is used to define the maximal size that an icon 
-        may have.
+        The maximal size, that an icon may become for that label, is 
+        defined by the given `maxIconSize`. 
+
+        Note that the current icon theme is determined by Qt. In order
+        to change that icon theme, a new theme name may be passed as 
+        `iconTheme`. This might be helpful, since Qt is making wrong 
+        assumptions about that theme on some desktop environments.
         """
         QtGui.QLabel.__init__(self, parent)
         self.maxIconSize = maxIconSize
+        if iconTheme:
+            Icon.setThemeName(iconTheme)
         self.icon = Icon.fromTheme(iconName or icongetter.ICON_RUN)
 
     @property
@@ -331,14 +339,19 @@ class LaunchWidget(QtGui.QWidget):
     in. In addition, an icon suitable for that command will be shown 
     beside the text field.
     """
-    def __init__(self, parent=None):
+    def __init__(self, iconTheme=None, parent=None):
         """
         Setup the widget. When the user starts typing, a popup is shown
         to suggest possible completions. If a command is recognized, an
-        appropriated icon is shown.
+        appropriated icon is shown (retrieved from the current icon theme). 
+
+        To explicitly set a certain theme name as the current icon theme, 
+        `iconName` may be used. If this is `None`, then the configuration 
+        dictionary's value for `icon-theme` is used instead (if any).
         """
         QtGui.QWidget.__init__(self, parent)
-        self.iconLabel = CommandIconLabel(parent=self)
+        theme = iconTheme or settings.config['icon-theme']
+        self.iconLabel = CommandIconLabel(iconTheme=theme, parent=self)
         self.edit = LaunchEdit(core.launch, parent=self)
         self.edit.textChanged.connect(self.iconLabel.update)
         self._makeLayout([self.iconLabel, self.edit])
