@@ -345,7 +345,7 @@ class LaunchWidget(QtGui.QWidget):
         to suggest possible completions. If a command is recognized, an
         appropriated icon is shown (retrieved from the current icon theme). 
 
-        To explicitly set a certain theme name as the current icon theme, 
+        To explicitly set a custom theme name as the current icon theme, 
         `iconName` may be used. If this is `None`, then the configuration 
         dictionary's value for `icon-theme` is used instead (if any).
         """
