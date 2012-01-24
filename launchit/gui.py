@@ -13,7 +13,7 @@ from PySide import QtCore, QtGui
 
 # Launchit package
 from . import core, icongetter, settings
-from ._stringutils import altstring
+from ._stringutils import altstring, convert
 
 class MarkedCompletionRenderer(QtGui.QTextDocument):
     """
@@ -292,10 +292,10 @@ class Icon(QtGui.QIcon):
         else:
             # Quick hack to convert the icon name into Pyside's 
             # string-type afterwards (for the sake of consistency).
-            _str = type(QtGui.QIcon.name(icon))
+            pyside_string = type(QtGui.QIcon.name(icon))
             # Use own attribute here, since setting an icon name
             # with "knowledge" of Qt seems not to be trivial.
-            icon._theme_icon_name = _str(name)
+            icon._theme_icon_name = convert(name, pyside_string)
         return icon
 
     def name(self):
