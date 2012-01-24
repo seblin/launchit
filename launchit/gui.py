@@ -261,6 +261,15 @@ class Icon(QtGui.QIcon):
     """
     A class to represent an icon.
     """
+    def __init__(self, icon):
+        """
+        Setup an instance for the given `icon`, which may either be a 
+        string containing the path to the icon or an instance of `QIcon`, 
+        `QPixmap` or `QIconEngine`.
+        """
+        QtGui.QIcon.__init__(self, icon)
+        self._theme_icon_name = None
+
     @classmethod
     def fromCommand(cls, command):
         """
@@ -273,12 +282,29 @@ class Icon(QtGui.QIcon):
     @classmethod
     def fromTheme(cls, name, fallback=QtGui.QIcon()):
         """
-        Look for icon with given `name` in the current icon theme 
+        Look for icon with given `name` inside the current icon theme 
         and return it in a new instance of this class. If no suitable 
         icon was found, then the instance is based on `fallback`.
         """
-        iconPath = icongetter.get_icon_path(name, theme=cls.themeName())
-        return cls(iconPath or fallback)
+        icon = cls(icongetter.get_icon_path(name, theme=cls.themeName()))
+        if icon.isNull():
+            icon = cls(fallback)
+        else:
+            # Quick hack to convert the icon name into Pyside's 
+            # string-type afterwards (for the sake of consistency).
+            _str = type(QtGui.QIcon.name(icon))
+            # Use own attribute here, since setting an icon name
+            # with "knowledge" of Qt seems not to be trivial.
+            icon._theme_icon_name = _str(name)
+        return icon
+
+    def name(self):
+        """
+        Return the name used to create the icon. Note that this is usually
+        only relevant when the instance was created by `.fromTheme()`. If
+        no (theme) icon name was set, an empty string will be returned.
+        """
+        return self._theme_icon_name or QtGui.QIcon.name(self)
 
 class CommandIconLabel(QtGui.QLabel):
     """
