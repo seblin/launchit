@@ -286,7 +286,7 @@ class Icon(QtGui.QIcon):
         and return it in a new instance of this class. If no suitable 
         icon was found, then the instance is based on `fallback`.
         """
-        icon = cls(icongetter.get_icon_path(name, theme=cls.themeName()))
+        icon = cls(cls.getIconPath(name))
         if icon.isNull():
             icon = cls(fallback)
         else:
@@ -297,6 +297,22 @@ class Icon(QtGui.QIcon):
             # with "knowledge" of Qt seems not to be trivial.
             icon._theme_icon_name = convert(name, pyside_string)
         return icon
+
+    @classmethod
+    def getIconPath(cls, name):
+        """
+        Return a path to an icon-file in the current theme that
+        corresponds to the given `name`.
+        """
+        return icongetter.get_icon_path(name, theme=cls.themeName())
+
+    @classmethod
+    def hasThemeIcon(cls, name):
+        """
+        Return a boolean indicating whether an icon with the given
+        `name` is available in the current icon theme.
+        """
+        return bool(cls.getIconPath(name))
 
     def name(self):
         """
