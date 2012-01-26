@@ -259,7 +259,7 @@ class LaunchEdit(QtGui.QLineEdit):
 
 class Icon(QtGui.QIcon):
     """
-    A class to represent an icon.
+    A class specialized to use theme icons based on PyXDG.
     """
     def __init__(self, icon):
         """
