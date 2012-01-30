@@ -268,8 +268,7 @@ class CommandIconLabel(QtGui.QLabel):
     """
     A label, which holds an icon to represent a command.
     """
-    def __init__(self, iconName=None, maxIconSize=32, 
-                       iconTheme=None, parent=None):
+    def __init__(self, iconName=None, iconTheme=None, parent=None):
         """
         Setup the icon label.
 
@@ -277,16 +276,12 @@ class CommandIconLabel(QtGui.QLabel):
         the current icon theme and initially set to the label. If that 
         name is `None`, then `icongetter.ICON_RUN` is used instead.
 
-        The maximal size, that an icon may become for that label, is 
-        defined by the given `maxIconSize`. 
-
         Note that the current icon theme is determined by Qt. In order
         to change that icon theme, a new theme name may be passed as 
         `iconTheme`. This might be helpful, since Qt is making wrong 
         assumptions about that theme on some desktop environments.
         """
         QtGui.QLabel.__init__(self, parent)
-        self.maxIconSize = maxIconSize
         if iconTheme:
             Icon.setThemeName(iconTheme)
         self.icon = Icon.fromTheme(iconName or icongetter.ICON_RUN)
@@ -304,8 +299,7 @@ class CommandIconLabel(QtGui.QLabel):
         Replace the old icon inside the label with new `icon`,
         which should a `QIcon`- or `Icon`-like instance.
         """
-        maxWidth = maxHeight = self.maxIconSize
-        pixmap = icon.pixmap(maxWidth, maxHeight)
+        pixmap = icon.pixmap(self.size())
         self.setPixmap(pixmap)
         self._icon = icon
 
