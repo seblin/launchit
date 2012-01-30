@@ -246,7 +246,7 @@ class Icon(QtGui.QIcon):
         Return a path to an icon-file in the current theme that
         corresponds to the given `name`.
         """
-        return icongetter.get_icon_path(name, theme=cls.themeName())
+        return icongetter.get_icon_path(name, 256, cls.themeName())
 
     @classmethod
     def hasThemeIcon(cls, name):
