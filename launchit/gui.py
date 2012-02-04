@@ -176,7 +176,7 @@ class LaunchEdit(QtGui.QLineEdit):
     """
     An editable text field, into which the user may type a command.
     """
-    def __init__(self, launcher=None, parent=None):
+    def __init__(self, launcher=None, description=None, parent=None):
         """
         Setup the text field. Possible completions will appear as soon as 
         the user starts typing. Pressing the return key will invoke the 
@@ -185,8 +185,17 @@ class LaunchEdit(QtGui.QLineEdit):
         Note that `launcher` is expected to be a callable that takes the 
         command to launch as a string. The way how the given command will 
         be invoked is up to that callable.
+
+        `description` may be used to set some descriptive text onto the 
+        widget. That text is used as the tooltip for the edit field and 
+        as the placeholder text, when the widget is empty and does not 
+        have the focus. Note that if no text is given, then no tooltip 
+        and no placeholder text will be shown.
         """
         QtGui.QLineEdit.__init__(self, parent)
+        if description:
+            self.setPlaceholderText(description)
+            self.setToolTip(description)
         completer = CommandlineCompleter(
             core.get_name_completions, parent=self)
         self.textEdited.connect(completer.update)
@@ -331,7 +340,9 @@ class LaunchWidget(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         theme = iconTheme or settings.config['icon-theme']
         self.iconLabel = CommandIconLabel(iconTheme=theme, parent=self)
-        self.edit = LaunchEdit(core.launch, parent=self)
+        self.edit = LaunchEdit(core.launch, 
+                               description='Type in a command to launch',
+                               parent=self)
         self.edit.textChanged.connect(self.iconLabel.update)
         self._makeLayout([self.iconLabel, self.edit])
 
