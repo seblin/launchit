@@ -176,7 +176,7 @@ class LaunchEdit(QtGui.QLineEdit):
     """
     An editable text field, into which the user may type a command.
     """
-    def __init__(self, launcher=None, description=None, parent=None):
+    def __init__(self, launcher, description=None, parent=None):
         """
         Setup the text field. Possible completions will appear as soon as 
         the user starts typing. Pressing the return key will invoke the 
