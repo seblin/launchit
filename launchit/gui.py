@@ -202,7 +202,7 @@ class LaunchEdit(QtGui.QLineEdit):
 
 class Icon(QtGui.QIcon):
     """
-    A class specialized to use theme icons based on PyXDG.
+    A class specialized to use theme icons based on given commands.
     """
     def __init__(self, icon):
         """
@@ -210,6 +210,7 @@ class Icon(QtGui.QIcon):
         string containing the path to the icon or an instance of `QIcon`,
         `QPixmap` or `QIconEngine`.
         """
+        # TODO: Use customized icon engine to make things cleaner.
         QtGui.QIcon.__init__(self, icon)
         self._theme_icon_name = None
 
