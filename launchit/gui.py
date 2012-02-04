@@ -357,16 +357,23 @@ class LaunchWidget(QtGui.QWidget):
             layout.addWidget(widget)
         self.setLayout(layout)
 
-def runApp(args=[], title='Launchit'):
+def runApp(args=[], title='Launchit', windowIconName='system-run'):
     """
-    Run the application based on `args`. The `LaunchWidget` will appear 
-    inside a window. That window will make use of `title` as the caption 
-    for its title bar. The applications's exit code will be returned after 
-    execution.
+    Run the application based on `args`. 
+
+    The `LaunchWidget` will appear inside a window. That window will make 
+    use of `title` as the caption for its title bar and `windowIconName` 
+    to retrieve a suitable icon from the current theme and set it as the 
+    window icon. Note that the latter is done after widget creation. Thus,
+    some setup regarding the icon theme may be done before, if needed.
+
+    At the end of execution the applications's exit code will be returned.
     """
     app = QtGui.QApplication(args)
     launcher = LaunchWidget()
     launcher.setWindowTitle(title)
+    icon = Icon.fromTheme(windowIconName)
+    launcher.setWindowIcon(icon)
     launcher.show()
     return app.exec_()
 
