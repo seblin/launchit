@@ -16,9 +16,10 @@ from ._stringutils import convert, keep_string_type
 from .core import (
     get_trimmed, is_command, is_executable_file, parse_commandline)
 
-# Icon name constants (following XDG icon spec)
+# Icon name constants (following XDG icon naming spec)
 ICON_RUN = 'system-run'
 ICON_EXECUTABLE = 'application-x-executable'
+ICON_FOLDER = 'folder'
 
 @keep_string_type
 def get_icon_path(icon_name, size=48, theme=None):
@@ -31,7 +32,7 @@ def get_icon_path(icon_name, size=48, theme=None):
     launchit's internal config dict (`settings.config['theme-name']`).
     """
     if os.path.isabs(icon_name):
-        # Work around strange PyXDG behaviour, 
+        # Work around strange PyXDG behavior, 
         # which would return an absolute path
         # unchanged (for whatever reason)
         return None
@@ -110,6 +111,8 @@ def guess_filetype_icon(filename):
     # TODO: Implement lots of more checks
     if is_command(filename) or is_executable_file(filename):
         name = ICON_EXECUTABLE
+    elif os.path.isdir(filename):
+        name = ICON_FOLDER
     else:
         name = None
     return name
