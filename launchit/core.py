@@ -161,27 +161,26 @@ def get_trimmed(path):
         path = os.path.basename(path)
     return path
 
+def get_command_path(filename):
+    """
+    Use the directories defined inside the environment variable PATH to 
+    check, whether they contain a file named `filename`. The first path 
+    that matches will be returned. `None` is returned if no match was 
+    found.
+    """
+    for path_dir in get_path_dirs():
+        expanded = os.path.join(path_dir, filename)
+        if os.path.isfile(expanded):
+            return expanded
+    return None
+
 def is_command(name):
     """
-    Return True if given name refers to an existing file in one of the
+    Return `True` if given name refers to an existing file in one of the
     directories defined inside the environment variable PATH, otherwise
-    False. The given name may be a filename or an absolute path.
+    `False`. The given name may be a filename or an absolute path.
     """
-    dirname, basename = os.path.split(name)
-    if not basename:
-        return False
-    path_dirs = get_path_dirs()
-    if dirname:
-        if dirname in path_dirs:
-            return os.path.isfile(name)
-        else:
-            return False
-    else:
-        for path_dir in path_dirs:
-            path = os.path.join(path_dir, basename)
-            if os.path.isfile(path):
-                return True
-    return False
+    return bool(get_command_path(name))
 
 def open_with_starter(path, silent=False):
     """
