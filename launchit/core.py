@@ -164,19 +164,19 @@ def get_trimmed(path):
 def get_command_path(filename):
     """
     Use the directories defined inside the environment variable PATH to 
-    check, whether they contain a file named `filename`. The first path 
-    that matches will be returned. `None` is returned if no match was 
-    found.
+    check, whether they contain an executable file named `filename`. The 
+    first path that matches will be returned. `None` is returned if no 
+    match was found.
     """
     for path_dir in get_path_dirs():
-        expanded = os.path.join(path_dir, filename)
-        if os.path.isfile(expanded):
-            return expanded
+        path = os.path.join(path_dir, filename)
+        if is_executable_file(path):
+            return path
     return None
 
 def is_command(name):
     """
-    Return `True` if given name refers to an existing file in one of the
+    Return `True` if given name refers to an executable file in one of the
     directories defined inside the environment variable PATH, otherwise
     `False`. The given name may be a filename or an absolute path.
     """
