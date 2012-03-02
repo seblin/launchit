@@ -200,9 +200,7 @@ def open_with_starter(path, silent=False):
 
 def is_executable_file(path):
     """
-    Return True if given path refers to a non-empty executable file,
-    otherwise False.
+    Return `True` if given `path` refers to a executable file, otherwise 
+    `False`.
     """
-    return (os.access(path, os.X_OK) and
-            os.path.isfile(path) and
-            os.path.getsize(path) > 0)
+    return os.access(path, os.X_OK) and os.path.isfile(path)
