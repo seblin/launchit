@@ -9,17 +9,14 @@ import warnings
 # 3rd party
 import xdg.IconTheme
 import xdg.Menu
+import xdg.Mime
 
 # Launchit package
 from . import settings
 from ._stringutils import convert, keep_string_type
-from .core import (
-    get_trimmed, is_command, is_executable_file, parse_commandline)
+from .core import get_command_path, get_trimmed, parse_commandline
 
-# Icon name constants (following XDG icon naming spec)
 ICON_RUN = 'system-run'
-ICON_EXECUTABLE = 'application-x-executable'
-ICON_FOLDER = 'folder'
 
 @keep_string_type
 def get_icon_path(icon_name, size=48, theme=None):
@@ -41,21 +38,24 @@ def get_icon_path(icon_name, size=48, theme=None):
     return xdg.IconTheme.getIconPath(icon_name, size, theme)
 
 @keep_string_type
-def guess_icon_name(command, split_args=True, fallback=ICON_RUN):
+def guess_icon_name(command, split_args=True, theme=None, fallback=ICON_RUN):
     """
     Return a suitable icon name for the given `command`. 
 
     If the command appears in one of the user's menu entries, then 
     return the icon name for that entry. Otherwise return a generic 
-    icon name depending on the filetype of `command`. In case that 
+    icon name depending on the MIME-type of `command`. In case that 
     no association could be made, `fallback` will be returned instead.
 
-    If `split_args` is `True`, then any whitespace inside `command` 
-    is stripped out, since it is interpreted as the delimiter in order 
-    to do shell-like parsing of `command` into arguments. The resulting
-    first argument is then used to guess an icon for it. In case that
-    `command` results in no arguments (i.e. it was given as a string of
-    pure whitespace characters), `fallback` will be returned for it.
+    If `split_args` is `True`, then POSIX-like shell-parsing is done
+    in order to split `command` into arguments. The resulting first 
+    argument will be used to guess the icon name.
+
+    Note that any resulting icon name is checked, whether it exists 
+    in the given `theme` by calling `get_icon_path()` on it. If the
+    theme does not contain the name, the next "namegetter" is used
+    (keeping the order as described above). Only the `fallback` icon 
+    itself (as the last resort) is returned without any checks.
     """
     if not command:
         return fallback
@@ -65,9 +65,12 @@ def guess_icon_name(command, split_args=True, fallback=ICON_RUN):
             return fallback
         else:
             command = args[0]
-    return (guess_starter_icon(command) or
-            guess_filetype_icon(command) or
-            fallback)
+    cmd_path = get_command_path(command) or command
+    for namegetter in (guess_starter_icon, get_mimetype_name):
+        name = namegetter(cmd_path)
+        if name and get_icon_path(name, theme=theme):
+            return name
+    return fallback
 
 @keep_string_type
 def guess_starter_icon(command, use_cache=True):
@@ -103,19 +106,21 @@ def guess_starter_icon(command, use_cache=True):
     return icon
 
 @keep_string_type
-def guess_filetype_icon(filename):
+def get_mimetype_name(filename):
     """
-    Return icon for given `filename` depending on its filetype. 
-    Return `None` if no association could be made.
+    Return an icon name corresponding to the given `filename`s MIME-type. 
+    Return `None` if no MIME-type could be determined. 
+
+    Note that this just returns a name in the form `mediatype-subtype`.
+    It does not check whether there really *is* an existing icon with 
+    that name in any icon theme. A caller might want to check this on 
+    its own for the desired theme.
     """
-    # TODO: Implement lots of more checks
-    if is_command(filename) or is_executable_file(filename):
-        name = ICON_EXECUTABLE
-    elif os.path.isdir(filename):
-        name = ICON_FOLDER
-    else:
-        name = None
-    return name
+    if not os.path.exists(filename):
+        # PyXDG would return text/plain
+        return None
+    mimetype = xdg.Mime.get_type(filename)
+    return '-'.join((mimetype.media, mimetype.subtype))
 
 # Low-level stuff
 

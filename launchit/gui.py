@@ -229,7 +229,7 @@ class Icon(QtGui.QIcon):
         Return a new instance of this class holding an appropriated 
         icon for the given `command`.
         """
-        iconName = icongetter.guess_icon_name(command)
+        iconName = icongetter.guess_icon_name(command, theme=cls.themeName())
         return cls.fromTheme(iconName)
 
     @classmethod
