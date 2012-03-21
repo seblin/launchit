@@ -66,7 +66,9 @@ def guess_icon_name(command, split_args=True, theme=None, fallback=ICON_RUN):
         else:
             command = args[0]
     cmd_path = get_command_path(command) or command
-    for namegetter in (guess_starter_icon, get_mimetype_name):
+    for namegetter in (guess_starter_icon, 
+                       get_mimetype_name, 
+                       get_gnome_mimetype_name):
         name = namegetter(cmd_path)
         if name and get_icon_path(name, theme=theme):
             return name
@@ -114,13 +116,30 @@ def get_mimetype_name(filename):
     Note that this just returns a name in the form `mediatype-subtype`.
     It does not check whether there really *is* an existing icon with 
     that name in any icon theme. A caller might want to check this on 
-    its own for the desired theme.
+    its own for a specific theme.
     """
     if not os.path.exists(filename):
         # PyXDG would return text/plain
         return None
     mimetype = xdg.Mime.get_type(filename)
-    return '-'.join((mimetype.media, mimetype.subtype))
+    return '{}-{}'.format(mimetype.media, mimetype.subtype)
+
+@keep_string_type
+def get_gnome_mimetype_name(filename):
+    """
+    A convenient function that calls `get_mimetype_name(filename)` and
+    prepends `gnome-mime-` to the resulting icon name. 
+
+    Note that this is intended to be used with `gnome`-themes, where icon 
+    names often appear in that special form.
+
+    If `get_mimetype_name()` did not return an icon name (i.e. MIME-type
+    detection failed), then `None` is returned.
+    """
+    name = get_mimetype_name(filename)
+    if not name:
+        return None
+    return 'gnome-mime-' + name
 
 # Low-level stuff
 
